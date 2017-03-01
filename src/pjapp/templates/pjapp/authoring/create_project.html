@@ -1,0 +1,20 @@
+{% extends "pjapp/authoring/base_form.html" %}
+
+{% block page_name %}
+    <i class="fa fa-plus-circle"></i>
+    <i class="fa fa-folder-open-o"></i>
+    Create a new project
+{% endblock %}
+{% block title_page_name %}Create a new project{% endblock %}
+
+{% block metadata %}
+<tr>
+    <th>
+        <i class="fa fa-user fa-fw"></i>
+        Creator:
+    </th>
+    <td>{{user.username}}</td> 
+</tr>
+{% endblock %}
+
+{% block submit_name %}Create project{% endblock %}

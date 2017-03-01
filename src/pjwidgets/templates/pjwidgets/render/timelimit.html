@@ -1,0 +1,58 @@
+{% load humanize %}
+<style type="text/css">
+    .available {
+        font-weight: 700;
+        color: #008000;
+    }
+    .unavailable {
+        font-weight: 700;
+        color: #FF0000;
+    }
+    .timeinfo {
+        font-style: italic;
+    }
+</style>
+{% if timelimit.title %}
+    <h2>{{timelimit.title}}</h2>
+{% endif %}
+    <p class="{{ available|yesno:'available,unavailable' }}">
+        <i class="fa {{ available|yesno:'fa-check-circle,fa-times-circle' }}"></i>
+        Available from {{timelimit.minimum_time}} to {{timelimit.maximum_time}}
+    </p>
+{% if early %}
+    <p class="timeinfo">
+        <i class="fa fa-clock-o"></i>
+        Wait until then&hellip; ({{timelimit.minimum_time|naturaltime}}).
+        You will have to refresh this page in your browser.
+    </p>
+        {% if timelimit.text_when_early %}
+    <div class="rich-content">
+        {{timelimit.text_when_early|safe }}
+    </div>
+    {% endif %}
+{% endif %}
+{% if late %}
+    <p class="timeinfo">
+        <i class="fa fa-clock-o"></i>
+        It's over since then ({{timelimit.maximum_time|naturaltime}}).
+    </p>
+    {% if timelimit.text_when_late %}
+    <div class="rich-content">
+        {{timelimit.text_when_late|safe }}
+    </div>
+    {% endif %}
+{% endif %}
+{% if available %}
+    {% if timelimit.maximum_time %}
+    <p class="timeinfo">
+        <i class="fa fa-clock-o"></i>
+        It will be over {{timelimit.maximum_time|naturaltime}}.
+    </p>
+    {% endif %}
+    {% if timelimit.text_when_on_time %}
+        <div class="rich-content">
+            {{timelimit.text_when_on_time|safe }}
+        </div>
+    {% endif %}
+{% endif %}
+

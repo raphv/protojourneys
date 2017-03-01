@@ -1,0 +1,128 @@
+.path-structure {
+    position: relative;
+}
+
+.path-block-underlay {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.path-line {
+    line-height: 0;
+    text-align: center;
+    margin: 0;
+}
+
+.path-block {
+    display: inline-block;
+    position: relative;
+    height: 60px;
+    max-width: 100%;
+    margin: 1.5em .5em;
+}
+
+.activity-block {
+    width: 160px;
+}
+
+.path-block.start-block,
+.path-block.end-block {
+    width: 120px;
+}
+
+.path-block h3 {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border: 1px solid #207050;
+    background: rgba(255,255,255,.5);
+    padding: 8px;
+    line-height: 1.1em;
+    margin: 0;
+}
+
+.path-block.start-block h3,
+.path-block.end-block h3 {
+    border-radius: 1em;
+}
+
+.path-block.start-block h3 {
+    background: rgba(220,255,220,.5);
+}
+
+.path-block.end-block h3 {
+    background: rgba(255,220,220,.5);
+}
+
+.path-block.active h3 {
+    left: -1px;
+    right: -1px;
+    top: -1px;
+    bottom: -1px;
+    border-width: 3px;
+    border-color: #cc0000;
+    padding: 7px;
+    background: rgba(255,255,0,.5);
+}
+
+.link-button {
+    position: absolute;
+    z-index: 2;
+    width: 1.4em;
+    text-align: center;
+    line-height: 1.4em;
+    height: 1.4em;
+    margin-top: -.7em;
+    margin-left: -.7em;
+    background: #808080;
+    color: #ffffff;
+    border-radius: .7em;
+    cursor: pointer;
+}
+
+.unused-activities {
+    display: inline-block;
+    width: 100%;
+    clear: both;
+    text-align: center;
+}
+
+.unused-activity-block {
+    float: left;
+    height: 58px;
+    width: 178px;
+    border: 1px solid #207050;
+    max-width: 100%;
+    margin: 8px;
+}
+
+.unused-activity-block.active {
+    height: 56px;
+    width: 176px;
+    border: 3px solid #CC0000;
+    margin: 7px;
+    background: rgba(255,255,0,.5);
+}
+
+.unused-activity-block h3 {
+    margin: 0;
+    padding: 8px;
+    line-height: 1.1em;
+}
+
+.unused-activity-block.active h3 {
+    padding: 7px;
+}
+
+.join-path {
+    float: left;
+    color: #800030;
+}

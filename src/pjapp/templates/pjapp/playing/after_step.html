@@ -1,0 +1,167 @@
+{% extends "pjapp/playing/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load widgets %}
+
+{% block page_name %}{{step.recorded_path.title}}: Go to step {{step.path_index|add:2}}{% endblock %}
+{% block title_page_name %}{{step.recorded_path.title}}: Go to Step {{step.path_index|add:2}}{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/player.css" %}">
+<script src="{% static "pjapp/script/player.js" %}"> </script>
+{% endblock %}
+
+{% block content %}
+<div class="status-block">
+{% if step.status == 'D' %}
+    <p>
+        <i class="fa fa-check fa-2x"></i>
+    </p>
+    <p>Done</p>
+{% elif step.status == 'S' %}
+    <p>
+        <i class="fa fa-step-forward fa-2x"></i>
+    </p>
+    <p>Skipped</p>
+{% endif %}
+</div>
+<button id="switch-to-comment">
+    <i class="fa fa-comments"></i>
+    Document this step
+</button>
+<h2 class="step-title">
+    <i class="fa fa-forward"></i>
+    Where do you wish to go after
+    <em>{{step.get_activity.title}}</em>?
+</h2>
+<p>
+    Step {{step.get_status_display|lower}}
+    at
+    {{step.date_ended}}
+</p>
+<form method="post" action="{% url 'pjapp:play:next_step' %}" id="next-form">
+    {% csrf_token %}
+    <input type="hidden" name="step-id" value="{{step.id}}">
+    <input type="hidden" name="next-activity-id" value="" id="next-activity-field" />
+    <input type="hidden" name="custom-activity-id" value="" id="custom-activity-field" />
+    <input type="hidden" name="is-canonical" value="" id="canonical-field" />
+    {% if destinations|length > 1 %}
+    <p>
+        <i class="fa fa-sitemap"></i>
+        You have multiple choices for the next step:
+    </p>
+    {% endif %}
+    <ul>
+    {% for destination in destinations %}
+        <li>
+            <button class="destbutton base-destination{% if destination.id == None %} end-destination{% endif %}" data-activity-id="{{destination.id}}" data-is-canonical="1">
+                <i class="fa fa-play"></i>
+                {{destination.title}}
+            </button>
+        </li>
+    {% endfor %}
+    </ul>
+    {% if hide_other %}
+    <h2>
+        <a href="#" class="show-non-canonical">
+            <i class="fa fa-chevron-circle-down"></i>
+            Show alternative (unplanned) options
+        </a>
+    </h2>
+    <ul id="non-canonical">
+    {% else %}
+    <ul>
+    {% endif %}
+        {% for destination in other_destinations %}
+        <li>
+            <button class="destbutton base-destination{% if destination.id == None %} end-destination{% endif %}" data-activity-id="{{destination.id}}" data-is-canonical="0">
+                <i class="fa fa-play"></i>
+                {{destination.title}}
+            </button>
+        </li>
+        {% endfor %}
+        {% for destination in custom_destinations %}
+        <li>
+            <button class="destbutton custom-destination" data-custom-activity-id="{{destination.id}}">
+                <i class="fa fa-play"></i>
+                {{destination.title}}
+            </button>
+        </li>
+        {% endfor %}
+        <li>
+            <button class="destbutton create-custom-destination">
+                <i class="fa fa-pencil"></i>
+                Create your own next step
+            </button>
+        </li>
+        <li>
+            <em>Use the option above to report on activities that aren't mentioned in the list above and that you think are part of the trajectory.</em>
+        </li>
+    </div>
+</form>
+{% endblock %}
+
+{% block foot_content %}
+<ul class="action-bar">
+    <li class="player-action" id="action-comment">
+        <div class="action-icon">
+            <i class="fa fa-comments"></i>
+        </div>
+        <div class="action-text">Document</div>
+    </li>
+    <li class="player-action" id="action-map">
+        <div class="action-icon">
+            <a href="#">
+                <i class="fa fa-map-o"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="#">Where am I?</a>
+        </div>
+    </li>
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:play:review_path' pk=step.recorded_path_id %}">
+                <i class="fa fa-line-chart"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:play:review_path' pk=step.recorded_path_id %}">Review Trajectory</a>
+        </div>
+    </li>
+</ul>
+<div class="lightbox-container" id="lightbox-root">
+    <div class="lightbox-background">
+    </div>
+    <div class="lightbox-centring">
+        <div id="comment-lightbox">
+            <div class="lightbox-contents">
+                <h3>Document this activity:</h3>
+                {% include 'pjapp/partials/comment_form.html' with activity_id=step.activity_id custom_activity_id=step.custom_activity_id recorded_path_id=step.recorded_path.id %}
+                <h3><span class="comment-count">{{comments.count}}</span> comment(s) on this activity:</h3>
+                <ul class="comment-list">
+                    {% for comment in comments %}
+                        {% include 'pjapp/partials/comment.html' %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <a class="lightbox-closer">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+        <div id="map-lightbox">
+            <div class="lightbox-contents">
+                <h3>Where am I?</h3>
+                {% if not step.is_on_trajectory %}
+                <p>This step is not on the original (canonical) trajectory and is not shown on the map.</p>
+                {% endif %}
+                <img class="pathmap" src="{% url 'pjapp:svg_path' recorded_path_pk=step.recorded_path_id %}"/>
+            </div>
+            <a class="lightbox-closer">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

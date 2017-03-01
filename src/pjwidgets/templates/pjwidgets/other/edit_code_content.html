@@ -1,0 +1,22 @@
+{% extends "pjwidgets/other/create_code_content.html" %}
+
+{% load widgets %}
+
+{% block page_name %}Edit code content{% endblock %}
+{% block title_page_name %}Edit code content{% endblock %}
+
+{% block qrcode %}
+{% with qrurl=form.instance.get_absolute_url %}
+<p>
+    QR Code should point to {% absolute_uri qrurl %}
+</p>
+<p>
+    <a href="{% url 'pjwidgets:qrencode' %}?data={% absolute_uri qrurl quote=True %}" class="preview-self">
+        <i class="fa fa-eye"></i>
+        <i class="fa fa-print"></i>
+        <i class="fa fa-qrcode"></i>
+        Preview/Print QR Code
+    </a>
+</p>
+{% endwith %}
+{% endblock %}

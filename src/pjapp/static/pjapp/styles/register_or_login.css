@@ -1,0 +1,60 @@
+.login-page-block {
+    margin: .5em 0 1em;
+}
+
+.helptext {
+    font-size: .8em;
+    font-style: italic;
+    display: block;
+}
+
+.login-page-block p {
+    font-size: 1.1em;
+    margin: .6em 0;
+}
+
+.errorlist {
+    color: #cc0000;
+}
+
+.login-page-block form {
+    text-align: right;
+}
+
+.login-page-block input[type=text],
+.login-page-block input[type=password],
+.login-page-block input[type=email] {
+    background: #fefefe;
+    border: 1px solid #20A080;
+}
+
+.login-page-block input[type=submit] {
+    background: #80ffc0;
+    border: 1px solid #20A080;
+    border-radius: 1px;
+    font-size: 1.2em;
+    line-height: 1.8em;
+    padding: 0 .4em;
+    border-radius: .2em;
+}
+
+@media (min-width:460px) {
+    .login-page-block label, .login-page-block p input {
+        display: inline-block;
+    }
+    .login-page-block label {
+        width: 33%;
+    }
+    .login-page-block input[type=text],
+    .login-page-block input[type=password],
+    .login-page-block input[type=email] {
+        width: 64%;
+    }
+}
+
+@media (max-width:460px) {
+    .login-page-block label, .login-page-block p input {
+        display: block; width: 100%;
+    }
+}
+

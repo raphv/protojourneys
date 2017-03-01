@@ -1,0 +1,35 @@
+{% load humanize %}
+{% load thumbnail %}
+{% load pjapp_extras %}
+
+<li class="comment item">
+    <h4>
+        Posted by {{comment.user.username}}
+        {{comment.date_created|naturaltime}}
+        <span class="rating">{{comment.rating|star_rating}}</span>
+    </h4>
+    {% if comment.activity or comment.recorded_path or comment.custom_activity %}
+    <h4>
+        Comment about
+        <ul class="comment-about-list">
+            {% if comment.activity %}
+            <li>activity “{{comment.activity.title}}”</li>
+            {% endif %}
+            {% if comment.custom_activity %}
+            <li>activity “{{comment.custom_activity.title}}”</li>
+            {% endif %}
+            {% if comment.recorded_path %}
+            <li>path “{{comment.recorded_path.title}}”</li>
+            {% endif %}
+        </ul>
+    </h4>
+    {% endif %}
+    <p>
+    {% if comment.image %}
+    {% thumbnail comment.image "160x120" as im %}
+        <img src="{{im.url}}" class="comment-image" />
+    {% endthumbnail %}
+    {% endif %}
+    {{comment.content}}
+    </p>
+</li>

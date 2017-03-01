@@ -1,0 +1,110 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% load staticfiles %}
+{% load clientlibs %}
+
+{% block page_name %}Editing map widget{% endblock %}
+{% block title_page_name %}Editing map widget{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+{% clientlib 'leaflet' %}
+<link rel="stylesheet" href="{% static 'pjwidgets/styles/edit-map.css' %}" />
+<script>
+    window.MAP_DATA = {{map_json|safe}};
+    window.ICON_BASE = "{% static 'pjwidgets/images/map-markers/' %}";
+</script>
+<script src="{% static 'pjwidgets/script/edit-map.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="columniser">
+        <div class="column">
+            
+            <div id="map-container">
+                <div id="map"></div>
+                <div class="crosshair vertical"></div>
+                <div class="crosshair horizontal"></div>
+            </div>
+            {{form.as_p}}
+            <p>
+                <a href="#" id="current-pos">
+                    <i class="fa fa-location-arrow"></i>
+                    Use your browser's geolocation
+                </a>
+            </p>
+         </div>
+    
+        <div class="column">
+            <h2>{{map.locations.count}} location(s) currently on map</h2>
+            {{ formset.management_form }}
+            <ul class="location-list">
+            {% for formlet in formset %}
+                {% if not formlet.id.value %}
+                <li>
+                    <h3>Add a new location:</h3>
+                </li>
+                {% endif %}
+                <li class="item location">
+                    {{formlet.non_field_errors}}
+                    {% for hidden in formlet.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <p>
+                        <img class="location-icon" src="{% static 'pjwidgets/images/map-markers/' %}l-marker-{{formlet.colour.value|default:'blue'}}.png" />
+                        {{ formlet.label.errors }}
+                        {{ formlet.label.label_tag }}
+                        {{ formlet.label }}
+                    </p>
+                    <p>
+                        {{ formlet.link_url.errors }}
+                        {{ formlet.link_url.label_tag }}
+                        {{ formlet.link_url }}
+                    </p>
+                    <p>
+                        {{ formlet.latitude.errors }}
+                        {{ formlet.latitude.label_tag }}
+                        {{ formlet.latitude }}
+                        {{ formlet.longitude.errors }}
+                        {{ formlet.longitude.label_tag }}
+                        {{ formlet.longitude }}
+                    </p>
+                    <p>
+                        <a href="#" class="geocoding">
+                            <i class="fa fa-search"></i>
+                            Find coordinates from label (Geocoding)
+                        </a>
+                    </p>
+                    {% if formlet.id.value %}
+                    <p>
+                        {{ formlet.DELETE.label_tag }}
+                        {{ formlet.DELETE }}
+                    </p>
+                    {% endif %}
+                    <ul class="location-icon-selector">
+                    {% for colour in COLOUR_CHOICES %}
+                        <li data-colour="{{colour}}">
+                            <img src="{% static 'pjwidgets/images/map-markers/' %}l-marker-{{colour}}.png" />
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+            
+            <input type="submit" value="Save map" />
+            
+            <h2>
+                <a href="{% url 'pjapp:author:explore_activity' pk=map.widget.activity_id %}">
+                    <i class="fa fa-arrow-left"></i>
+                    <i class="fa fa-calendar-check-o"></i>
+                    Back to activity
+                </a>
+            </h2>
+        </div>
+    </div>
+</form>
+{% endblock %}

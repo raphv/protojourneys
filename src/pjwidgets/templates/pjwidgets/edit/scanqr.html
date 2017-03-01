@@ -1,0 +1,163 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% load widgets %}
+
+{% block page_name %}Editing Code scanning{% endblock %}
+{% block title_page_name %}Editing Code scanning{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<style>
+    .item a {
+        display: inline-block;
+    }
+</style>
+<script>
+$(function() {
+    $('.delete-code').click(function() {
+        var $parent = $(this).parents('li[data-codecontent-id]');
+        if (confirm('Do you really wish to delete code content "' + $parent.find('h3').text() + '"')) {
+            $('#delete-codecontent-id').val($parent.attr('data-codecontent-id'));
+            $('#delete-codecontent-form').submit();
+        }
+        return false;
+    });
+    function activate(el, availability) {
+        var $parent = $(el).parents('li[data-codecontent-id]');
+        $('#switch-codecontent-id').val($parent.attr('data-codecontent-id'));
+        $('#switch-availability').val(availability);
+        $('#switch-code-availability-form').submit();
+    }
+    $('.activate-code').click(function() {
+        activate(this,'1');
+        return false;
+    });
+    $('.deactivate-code').click(function() {
+        activate(this,'0');
+        return false;
+    });
+    $('.preview-self').click(function() {
+        window.open(
+            $(this).attr('href'),
+            $(this).attr('title') || 'New window',
+            'width=500,height=300,menubar=no,location=no,resizable=no,scrollbars=no,status=no'
+        );
+        return false;
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="delete-codecontent-form" action="{% url 'pjwidgets:delete_code_content' %}?next={{request.path}}">
+    {% csrf_token %}
+    <input type="hidden" name="codecontent_id" id="delete-codecontent-id" value="" />
+</form>
+<form method="post" id="switch-code-availability-form" action="{% url 'pjwidgets:switch_code_availability' %}">
+    {% csrf_token %}
+    <input type="hidden" name="widget_id" value="{{widget.id}}" />
+    <input type="hidden" name="codecontent_id" id="switch-codecontent-id" value="" />
+    <input type="hidden" name="availability" id="switch-availability" value="0" />
+</form>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p class="submit-container">
+        <input type="submit" value="Save Code scanning" />
+    </p>
+</form>
+
+<h2>
+    <a href="{% url 'pjwidgets:create_code_content' project_id=widget.activity.project_id %}?next={{request.path}}">
+        <i class="fa fa-plus-circle"></i>
+        Create a new code
+    </a>
+</h2>
+
+<h2>
+    <i class="fa fa-eye"></i>
+    Active codes for this widget:
+</h2>
+
+{% if active_codes %}
+<ul>
+    {% for codecontent in active_codes %}
+    <li class="item" data-codecontent-id="{{codecontent.id}}">
+        <h3>{{codecontent.title}}</h3>
+        <p>
+            <a href="{% url 'pjwidgets:edit_code_content' codecontent_id=codecontent.id %}?next={{request.path}}">
+                <i class="fa fa-pencil"></i>
+                Edit
+            </a>
+            &mdash;
+            <a href="#" class="deactivate-code">
+                <i class="fa fa-eye-slash"></i>
+                Deactivate
+            </a>
+            &mdash;
+            <a href="#" class="delete-code">
+                <i class="fa fa-trash"></i>
+                Delete
+            </a>
+            &mdash;
+            <a href="{% url 'pjwidgets:qrencode' %}?data={% absolute_uri codecontent.get_absolute_url quote=True %}" class="preview-self">
+                <i class="fa fa-qrcode"></i>
+                Preview/print QR Code
+            </a>
+        {% if widget.scanqr.use_artcodes and codecontent.artcode %}
+            &mdash;
+            <a href="{% url 'pjwidgets:artcode_encode' code=codecontent.artcode %}" class="preview-self">
+                <i class="fa fa-paint-brush"></i>
+                Preview Artcode
+            </a>
+        {% endif %}
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No active codes</p>
+{% endif %}
+
+<h2>
+    <i class="fa fa-eye-slash"></i>
+    Inactive codes for this widget:
+</h2>
+
+{% if inactive_codes %}
+<p>These codes are available for other widgets in the same project. Be careful when deleting them!</p>
+<ul>
+    {% for codecontent in inactive_codes %}
+    <li class="item" data-codecontent-id="{{codecontent.id}}">
+        <h3>{{codecontent.title}}</h3>
+        <p>
+            <a href="{% url 'pjwidgets:edit_code_content' codecontent_id=codecontent.id %}?next={{request.path}}">
+                <i class="fa fa-pencil"></i>
+                Edit
+            </a>
+            &mdash;
+            <a href="#" class="activate-code">
+                <i class="fa fa-eye"></i>
+                Activate
+            </a>
+            &mdash;
+            <a href="#" class="delete-code">
+                <i class="fa fa-trash"></i>
+                Delete
+            </a>
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No inactive codes</p>
+{% endif %}
+
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

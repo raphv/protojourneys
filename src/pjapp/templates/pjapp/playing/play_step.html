@@ -1,0 +1,207 @@
+{% extends "pjapp/playing/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load widgets %}
+
+{% block page_name %}{{step.recorded_path.title}}: Step {{step.path_index|add:1}}{% endblock %}
+{% block title_page_name %}{{step.recorded_path.title}}: Step {{step.path_index|add:1}}{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/player.css" %}">
+<script src="{% static "pjapp/script/player.js" %}"> </script>
+{% endblock %}
+
+{% block content %}
+<h2 class="step-title">
+    <i class="fa fa-calendar-check-o"></i>
+    {{step.get_activity.title}}
+</h2>
+<table class="item-metadata">
+    <tr>
+        <th>
+            <i class="fa fa-question-circle fa-fw"></i>
+            Status:
+        </th>
+        <td>
+            <i class="fa {{status_icon}}"></i>
+            {{step.get_status_display}}
+        </td>
+    </tr>
+    <tr>
+        <th>
+            <i class="fa fa-clock-o fa-fw"></i>
+            Started:
+        </th>
+        <td>{{step.date_started|naturaltime}}</td>
+    </tr>
+    {% if step.status != 'P' %}
+    <tr>
+        <th>
+            <i class="fa fa-clock-o fa-fw"></i>
+            {% if step.status == 'S' %}Skipped{% else %}Ended{% endif %}:
+        </th>
+        <td>{{step.date_ended|naturaltime}}</td>
+    </tr>
+    {% if step.next_step %}
+    <tr>
+        <th>
+            <i class="fa fa-forward fa-fw"></i>
+            You went on to:
+        </th>
+        <td>
+            <a href="{% url 'pjapp:play:play_step' pk=step.next_step.id %}">{{step.next_step.get_activity.title}}</a>
+        </td>
+    </tr>
+    {% endif %}
+    {% endif %}
+</table>
+<p class="metadata-field">
+    <i class="fa fa-list-alt fa-fw"></i>
+    Description:
+</p>
+<div class="rich-content">
+    {{step.get_activity.get_description_html}}
+</div>
+{% if step.has_custom_activity %}
+<h2>
+    This is a custom activity.
+    <a href="{% url 'pjapp:play:edit_custom_activity' pk=step.custom_activity.id %}?next={{request.path}}">
+        <i class="fa fa-pencil"></i>
+        Edit this activity
+    </a>
+</h2>
+{% else %}
+<ul class="widgets">
+    {% for widget in step.get_activity.widgets.all %}
+    {% render_widget widget %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block foot_content %}
+<ul class="action-bar">
+    <li class="player-action" id="action-comment">
+        <div class="action-icon">
+            <i class="fa fa-comments"></i>
+        </div>
+        <div class="action-text">Document</div>
+    </li>
+    {% if step.status == 'P' %}
+    <li class="player-action" id="action-done">
+        <div class="action-icon">
+            <i class="fa fa-check"></i>
+        </div>
+        <div class="action-text">Done</div>
+    </li>
+    <li class="player-action" id="action-skip">
+        <div class="action-icon">
+            <i class="fa fa-step-forward"></i>
+        </div>
+        <div class="action-text">Skip</div>
+    </li>
+    {% else %}
+    {% if step.previous_step %}
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:play:play_step' pk=step.previous_step.id %}">
+                <i class="fa fa-backward"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:play:play_step' pk=step.previous_step.id %}">Previous</a>
+        </div>
+    </li>
+    {% endif %}
+    {% if step.next_step %}
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:play:play_step' pk=step.next_step.id %}">
+                <i class="fa fa-forward"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:play:play_step' pk=step.next_step.id %}">Next</a>
+        </div>
+    </li>
+    {% endif %}
+    {% endif %}
+    {% if show_continue %}
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:play:path_next' pk=step.recorded_path_id %}">
+                <i class="fa fa-forward"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:play:path_next' pk=step.recorded_path_id %}">Continue</a>
+        </div>
+    </li>
+    {% endif %}
+    {% if step.recorded_path.path %}
+    <li class="player-action" id="action-map">
+        <div class="action-icon">
+            <a href="#">
+                <i class="fa fa-map-o"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="#">Where am I?</a>
+        </div>
+    </li>
+    {% endif %}
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:play:review_path' pk=step.recorded_path_id %}">
+                <i class="fa fa-history"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:play:review_path' pk=step.recorded_path_id %}">Review Trajectory</a>
+        </div>
+    </li>
+</ul>
+<div class="lightbox-container" id="lightbox-root">
+    <div class="lightbox-background">
+    </div>
+    <div class="lightbox-centring">
+        <div id="comment-lightbox">
+            <div class="lightbox-contents">
+                <h3>Document this activity:</h3>
+                {% include 'pjapp/partials/comment_form.html' with activity_id=step.activity_id custom_activity_id=step.custom_activity_id recorded_path_id=step.recorded_path.id %}
+                <h3><span class="comment-count">{{comments.count}}</span> comment(s) on this activity:</h3>
+                <ul class="comment-list">
+                    {% for comment in comments %}
+                        {% include 'pjapp/partials/comment.html' %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <a class="lightbox-closer">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+        {% if step.recorded_path.path %}
+        <div id="map-lightbox">
+            <div class="lightbox-contents">
+                <h3>Where am I?</h3>
+                {% if not step.is_on_trajectory %}
+                <p>This step is not on the original (canonical) trajectory and is not shown on the map.</p>
+                {% endif %}
+                <img class="pathmap" src="{% url 'pjapp:svg_path' recorded_path_pk=step.recorded_path_id %}"/>
+            </div>
+            <a class="lightbox-closer">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% if step.status == 'P' %}
+<form method="post" action="{% url 'pjapp:play:finish_step' %}" id="finish-step-form">
+    {% csrf_token %}
+    <input type="hidden" name="step-id" value="{{step.id}}">
+    <input type="hidden" name="step-status" value="" id="step-status-field">
+</form>
+{% endif %}
+{% endblock %}

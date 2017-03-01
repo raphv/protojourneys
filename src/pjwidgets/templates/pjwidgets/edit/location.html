@@ -1,0 +1,58 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% load staticfiles %}
+{% load clientlibs %}
+
+{% block page_name %}Editing map widget{% endblock %}
+{% block title_page_name %}Editing map widget{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+{% clientlib 'leaflet' %}
+<style type="text/css">
+    @media screen and (min-width: 600px) {
+        #map-container {
+            float: left;
+            width: 50%;
+            padding-right: 10px;
+            box-sizing: border-box;
+        }
+    }
+    #map {
+        width: 100%;
+        height: 200px;
+    }
+    label[for^="id_text"] {
+        display: block;
+        clear: both;
+    }
+</style>
+<script src="{% static 'pjwidgets/script/edit-location.js' %}"> </script>
+{% endblock %}
+
+{% block content %}
+<div id="map-container">
+    <div id="map"></div>
+    <p>
+        <a href="#" id="current-pos">
+            <i class="fa fa-location-arrow"></i>
+            Use your browser's geolocation
+        </a>
+    </p>
+</div>
+<form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <p class="submit-container">
+        <input type="submit" value="Save widget" />
+    </p>
+</form>
+
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

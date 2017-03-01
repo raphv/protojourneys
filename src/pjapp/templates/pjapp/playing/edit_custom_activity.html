@@ -1,0 +1,21 @@
+{% extends "pjapp/playing/base.html" %}
+{% load staticfiles %}
+
+{% block page_name %}Edit activity “{{activity.title}}”{% endblock %}
+{% block title_page_name %}Edit activity “{{activity.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/django-forms.css" %}">
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{next}}" />
+    {{form.as_p}}
+    <p class="submit-container">
+        <input type="submit" value="Save activity" />
+    </p>    
+</form>
+{% endblock %}

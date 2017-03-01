@@ -1,0 +1,20 @@
+{% extends "pjapp/authoring/base_form.html" %}
+
+{% block page_name %}
+    <i class="fa fa-plus-circle"></i>
+    <i class="fa fa-line-chart"></i>
+    Create a new trajectory
+{% endblock %}
+{% block title_page_name %}Create a new trajectory{% endblock %}
+
+{% block metadata %}
+<tr>
+    <th>
+        <i class="fa fa-folder-open-o fa-fw"></i>
+        Project:
+    </th>
+    <td>{{project.title}}</td> 
+</tr>
+{% endblock %}
+
+{% block submit_name %}Create trajectory{% endblock %}

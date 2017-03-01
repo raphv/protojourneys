@@ -1,0 +1,112 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% load clientlibs %}
+
+{% block page_name %}Editing time limit widget{% endblock %}
+{% block title_page_name %}Editing time limit widget{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+{% clientlib 'jquery-ui' %}
+<script>
+$(function() {
+    $('.date-picker').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+    function showHideDates() {
+        $('#block_minimum_time').toggle($('#id_has_minimum_time').is(':checked'));
+        $('#block_maximum_time').toggle($('#id_has_maximum_time').is(':checked'));
+    }
+    $('#id_has_minimum_time,#id_has_maximum_time').on('change', showHideDates);
+    $('.set-today').click(function() {
+        $(this).prev().val('{% now "d/m/Y" %}');
+        return false;
+    });
+    $('.set-now').click(function() {
+        $(this).prev().val(new Date().toTimeString().substr(0,8));
+        return false;
+    });
+    showHideDates();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <p>
+        {{ form.title.errors }}
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </p>
+    <div class="item">
+        <h3>
+            {{ form.has_minimum_time.errors }}
+            {{ form.has_minimum_time.label_tag }}
+            {{ form.has_minimum_time }}
+        </h3>
+        <div id="block_minimum_time">
+            <p>
+                {{ form.minimum_time_date.errors }}
+                {{ form.minimum_time_date.label_tag }}
+                {{ form.minimum_time_date }}
+                <a href="#" class="set-today">Today</a>
+            </p>
+            <p>
+                {{ form.minimum_time_time.errors }}
+                {{ form.minimum_time_time.label_tag }}
+                {{ form.minimum_time_time }}
+                <a href="#" class="set-now">Now</a>
+            </p>
+            <p>
+                {{ form.text_when_early.errors }}
+                {{ form.text_when_early.label_tag }}
+                {{ form.text_when_early }}
+            </p>
+        </div>
+    </div>
+    <p>
+        {{ form.text_when_on_time.errors }}
+        {{ form.text_when_on_time.label_tag }}
+        {{ form.text_when_on_time }}
+    </p>
+    <div class="item">
+        <h3>
+            {{ form.has_maximum_time.errors }}
+            {{ form.has_maximum_time.label_tag }}
+            {{ form.has_maximum_time }}
+        </h3>
+        <div id="block_maximum_time">
+            <p>
+                {{ form.maximum_time_date.errors }}
+                {{ form.maximum_time_date.label_tag }}
+                {{ form.maximum_time_date }}
+                <a href="#" class="set-today">Today</a>
+            </p>
+            <p>
+                {{ form.maximum_time_time.errors }}
+                {{ form.maximum_time_time.label_tag }}
+                {{ form.maximum_time_time }}
+                <a href="#" class="set-now">Now</a>
+            </p>
+            <p>
+                {{ form.text_when_late.errors }}
+                {{ form.text_when_late.label_tag }}
+                {{ form.text_when_late }}
+            </p>
+        </div>
+    </div>
+    <p class="submit-container">
+        <input type="submit" value="Save time limit widget" />
+    </p>
+</form>
+
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

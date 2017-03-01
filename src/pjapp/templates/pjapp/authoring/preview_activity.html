@@ -1,0 +1,62 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load widgets %}
+
+{% block page_name %}Preview activity {{activity.title}}{% endblock %}
+{% block title_page_name %}Preview activity {{activity.title}}{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/player.css" %}">
+<script src="{% static "pjapp/script/player.js" %}"> </script>
+{% endblock %}
+
+{% block content %}
+<p>This is how trajectory participants will see your activity</p>
+<h2 class="step-title">
+    <i class="fa fa-calendar-check-o"></i>
+    {{activity.title}}
+</h2>
+<table class="item-metadata">
+    <tr>
+        <th>
+            <i class="fa fa-question-circle fa-fw"></i>
+            Status:
+        </th>
+        <td>
+            <i class="fa fa-arrow-right"></i>
+            <i class="fa fa-check"></i>
+            <i class="fa fa-step-forward"></i>
+            In progress, Done or Skipped
+        </td>
+    </tr>
+</table>
+<p class="metadata-field">
+    <i class="fa fa-list-alt fa-fw"></i>
+    Description:
+</p>
+<div class="rich-content">
+    {{activity.get_description_html}}
+</div>
+<ul class="widgets">
+    {% for widget in activity.widgets.all %}
+    {% render_widget widget preview=True %}
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block foot_content %}
+<ul class="action-bar">
+    <li class="player-action">
+        <div class="action-icon">
+            <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}" target="_top">
+                <i class="fa fa-eye-slash"></i>
+            </a>
+        </div>
+        <div class="action-text">
+            <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}" target="_top">Exit preview</a>
+        </div>
+    </li>
+</ul>
+{% endblock %}

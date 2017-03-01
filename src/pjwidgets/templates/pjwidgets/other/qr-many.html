@@ -1,0 +1,29 @@
+{% extends 'pjapp/playing/base.html' %}
+{% load humanize %}
+
+{% block page_name %}You've scanned a QR Code.{% endblock %}
+{% block title_page_name %}You've scanned a QR Code.{% endblock %}
+
+{% block content %}
+<h2>
+    <i class="fa fa-warning"></i>
+    You are playing activity "{{widget.activity.title}}" on several trajectories at the same time.
+</h2>
+<p>Please choose on which you wish to activate the QR Code</p>
+<ul>
+    {% for step in candidate_steps %}
+    <li class="item">
+        <p>
+            <i class="fa fa-calendar-check-o fa-fw"></i>
+            <a href="{% url 'pjwidgets:codecallback' codecontent_id=codecontent.id step_id=step.id %}">
+                Step {{step.path_index|add:1}} in trajectory "{{step.recorded_path.title}}"
+            </a>
+        </p>
+        <p>
+            <i class="fa fa-clock-o fa-fw"></i>
+            You started this step {{step.date_started|naturaltime}} and the trajectory {{step.recorded_path.date_started|naturaltime}}.
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

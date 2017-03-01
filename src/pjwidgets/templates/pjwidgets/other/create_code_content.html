@@ -1,0 +1,61 @@
+{% extends "pjapp/authoring/base.html" %}
+
+{% load staticfiles %}
+
+{% block page_name %}Create code content{% endblock %}
+{% block title_page_name %}Create code content{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/django-forms.css" %}" />
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script>
+    $(function() {
+        $('.preview-artcode').click(function() {
+            var code = $(this).parents('form').find('input[name=artcode]').val();
+            if (!code) {
+                return false;
+            }
+            if (/^([1-9]\:)+[1-9]$/.test(code)) {
+                var url = "{% url 'pjwidgets:artcode_encode' code='0:0' %}".replace(/0\:0\/$/,code);
+                window.open(
+                    url,
+                    'SVG Artcode',
+                    'width=500,height=300,menubar=no,location=no,resizable=no,scrollbars=no,status=no'
+                );
+            } else {
+                alert(code + ' is not a valid artcode');
+            }
+            return false;
+        });
+        $('.preview-self').click(function() {
+            window.open(
+                $(this).attr('href'),
+                $(this).attr('title') || 'New window',
+                'width=500,height=300,menubar=no,location=no,resizable=no,scrollbars=no,status=no'
+            );
+            return false;
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="django-form">
+    {% csrf_token %}
+    {{form.as_p}}
+    <p>
+        <a href="#" class="preview-artcode">
+            <i class="fa fa-eye"></i>
+            <i class="fa fa-paint-brush"></i>
+            Preview artcode
+        </a>
+    </p>
+    {% block qrcode %}{% endblock %}
+    <input type="hidden" name="next" value="{{next}}"/>
+    <p class="submit-container">
+        <input type="submit" value="Save code content" />
+    </p>
+</form>
+{% endblock %}

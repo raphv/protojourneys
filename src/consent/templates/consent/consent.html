@@ -1,0 +1,34 @@
+{% extends 'pjapp/base.html' %}
+
+{% block page_name %}Consent form{% endblock %}
+{% block title_page_name %}Consent form{% endblock %}
+
+{% block body_class %}common{% endblock %}
+
+{% block content %}
+<style type="text/css">
+    div.answer-container {
+        text-align: right;
+    }
+    .errorlist {
+        color: #CC0000;
+    }
+    .answer-container li {
+        display: inline-block;
+    }
+</style>
+<form method="post">
+    {% csrf_token %}
+    {{formset.management_form}}
+    {% for form in formset %}
+    <div>
+        {{form.instance.description|safe}}
+        <div class="answer-container">
+            {{form}}
+        </div>
+    </div>
+    {% endfor %}
+    <input type="hidden" name="next" value="{{next}}" />
+    <input type="submit" value="Submit consent form" />
+</form>
+{% endblock %}

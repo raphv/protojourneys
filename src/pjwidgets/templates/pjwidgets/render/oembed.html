@@ -1,0 +1,6 @@
+{% if widget.title %}
+    <h2>
+        <a href="{{widget.oembed.url}}" target="_blank">{{widget.title}}</a>
+    </h2>
+{% endif %}
+<div class="rich-content">{{widget.oembed.get_embed_html}}</div>

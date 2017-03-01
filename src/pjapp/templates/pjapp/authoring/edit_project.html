@@ -1,0 +1,56 @@
+{% extends "pjapp/authoring/base_form.html" %}
+{% load humanize %}
+
+{% block page_name %}
+    <i class="fa fa-pencil"></i>
+    <i class="fa fa-folder-open-o"></i>
+    Edit project “{{project.title}}”
+{% endblock %}
+{% block title_page_name %}Edit project “{{project.title}}”{% endblock %}
+
+{% block metadata %}
+<tr>
+    <th>
+        <i class="fa fa-calendar-check-o fa-fw"></i>
+        Activity count:
+    </th>
+    <td>
+        {{project.activities.count}}
+        —
+        <a href="{% url 'pjapp:author:create_activity' pk=project.id %}">
+            <i class="fa fa-plus-circle"></i>
+            Add activity to project
+        </a>
+    </td>
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-line-chart fa-fw"></i>
+        Trajectory count:
+    </th>
+    <td>
+        {{project.paths.count}}
+        —
+        <a href="{% url 'pjapp:author:create_path' pk=project.id %}">
+            <i class="fa fa-plus-circle"></i>
+            Add trajectory to project
+        </a>
+    </td>
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-clock-o fa-fw"></i>
+        Created:
+    </th>
+    <td>{{project.date_created|naturaltime}}</td>
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-clock-o fa-fw"></i>
+        Last updated:
+    </th>
+    <td>{{project.date_updated|naturaltime}}</td>
+</tr>
+{% endblock %}
+
+{% block submit_name %}Save project{% endblock %}

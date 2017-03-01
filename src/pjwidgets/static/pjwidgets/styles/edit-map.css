@@ -1,0 +1,58 @@
+#map-container {
+    width: 100%;
+    position: relative;
+    height: 350px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.crosshair {
+    position: absolute;
+    z-index: 100;
+    background: #ff0000;
+}
+
+.crosshair.vertical {
+    width: 1px;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+}
+
+.crosshair.horizontal {
+    height: 1px;
+    top: 50%;
+    left: 0;
+    right: 0;
+}
+
+.location-icon,
+.location-icon-selector img {
+    width: 20px;
+    height: 32.8px;
+}
+
+.location-icon {
+    float: left;
+    margin-right: 5px;
+}
+
+.item.location .location-icon {
+    margin-top: -10px;
+    margin-left: -5px;
+}
+
+.location-icon-selector {
+    display: none;
+    cursor: pointer;
+}
+
+.location-icon-selector li {
+    display: inline-block;
+    margin: 0;
+}

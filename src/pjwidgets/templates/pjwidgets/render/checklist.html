@@ -1,0 +1,120 @@
+<style type="text/css">
+    ul.checklist {
+        display: inline-block;
+        width: 100%;
+        clear: both;
+    }
+    @media (min-width:400px) {
+        li.checklist-item {
+            float: left;
+            margin: .25em 0;
+            width: 50%;
+        }
+    }
+    @media (min-width:520px) {
+        li.checklist-item {
+            width: 33%;
+        }
+    }
+    @media (min-width:640px) {
+        li.checklist-item {
+            width: 25%;
+        }
+    }
+    a.checked {
+        color: #008000;
+    }
+    a.unchecked {
+        color: #808080;
+    }
+    .checklist input {
+        box-sizing: border-box;
+        width: 100%;
+    }
+</style>
+<script>
+    $(function() {
+        var endpoint = "{% url 'pjwidgets:ajax_checklist' %}",
+            checklist_instance_id = '{{checklist_instance.id}}',
+            csrf_token = '{{csrf_token}}',
+            $list = $('#checklist-' + checklist_instance_id),
+            tmpl = '<li class="checklist-item"><a href="#" class="remove-link checked"><i class="fa fa-check-circle"></i> <span class="content"></span></a></li>';
+        function getData(allData) {
+            return Array.prototype.slice.call(
+                $list.find( (allData ? '.checklist-item' : '.checked' ) + ' .content' ).map(function(i, el) {
+                    return el.textContent;
+                })
+            );
+        }
+        function submitList() {
+            $.ajax({
+                url: endpoint,
+                type: 'post',
+                data: {
+                    contents: JSON.stringify(getData()),
+                    id: checklist_instance_id
+                },
+                headers: {
+                    'X-CSRFToken': csrf_token
+                }
+            });
+        }
+        $list.find('a.check-link').click(function() {
+            $(this).toggleClass('checked unchecked');
+            $(this).find('i').toggleClass('fa-check-circle fa-circle-o');
+            submitList();
+            return false;
+        });
+        $list.find('form.add-form').on('submit', function() {
+            var $input = $(this).find('input'),
+                val = $input.val();
+            console.log(getData(true), val);
+            if (getData(true).indexOf(val) === -1) {
+                var $el = $(tmpl);
+                $el.find('.content').text(val);
+                $el.insertBefore($(this).parent());
+                $input.val('');
+                submitList();
+            }
+            return false;
+        });
+        $list.find('.user-checklist').on('click','a.remove-link', function() {
+            $(this).parent().remove();
+            submitList();
+            return false;
+        });
+    });
+</script>
+{% if checklist.title %}
+    <h2>{{checklist.title}}</h2>
+{% endif %}
+<div id="checklist-{{checklist_instance.id}}">
+    <ul class="checklist">
+        {% for item in base_items %}
+        <li class="checklist-item">
+            <a href="#" class="check-link {{item.checked|yesno:'checked,unchecked'}}">
+                <i class="fa {{item.checked|yesno:'fa-check-circle,fa-circle-o'}}"></i>
+                <span class="content">{{item.text}}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if allow_custom_items %}
+    <h3>Your custom item(s):</h3>
+    <ul class="checklist user-checklist">
+        {% for item in user_items %}
+        <li class="checklist-item">
+            <a href="#" class="remove-link checked">
+                <i class="fa fa-check-circle"></i>
+                <span class="content">{{item}}</span>
+            </a>
+        </li>
+        {% endfor %}
+        <li class="checklist-item">
+            <form class="add-form">
+                <input type="text" autocomplete="off" placeholder="Add custom item" />
+            </form>
+        </li>
+    </ul>
+    {% endif %}
+</div>

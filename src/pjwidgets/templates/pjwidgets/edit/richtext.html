@@ -1,0 +1,22 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% block page_name %}Editing rich text block{% endblock %}
+{% block title_page_name %}Editing rich text block{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p class="submit-container">
+        <input type="submit" value="Save rich text block" />
+    </p>
+</form>
+
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

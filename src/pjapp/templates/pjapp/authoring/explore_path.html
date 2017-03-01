@@ -1,0 +1,263 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}<i class="fa fa-line-chart"></i> View trajectory “{{path.title}}”{% endblock %}
+{% block title_page_name %}View trajectory “{{path.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/path-map.css" %}">
+<script>
+    window.PATH_LINKS = {{links_json|safe}};
+    window.PATH_BLOCKS = {{blocks_json|safe}};
+</script>
+<script src="{% static "pjapp/script/path-map.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2>
+            <i class="fa fa-sitemap"></i>
+            View trajectory structure
+        </h2>
+        <div class="path-structure">
+            <canvas class="path-block-underlay"> </canvas>
+            <ul class="path-blocks">
+                <li class="path-line">
+                    <div class="path-block start-block" data-activity-id="_START_">
+                        <h3>
+                            <a href="#" class="join-path">
+                                <i class="fa fa-share-alt"></i>
+                            </a>
+                            <i class="fa fa-flag"></i>
+                            Start of trajectory
+                        </h3>
+                    </div>
+                </li>
+                {% for line in activity_blocks %}
+                <li class="path-line">
+                    <ul>
+                    {% for activity_block in line %}
+                        <li class="path-block activity-block" data-activity-id="{{activity_block.activity_id}}">
+                            <h3>
+                                <a href="#" class="join-path">
+                                    <i class="fa fa-share-alt"></i>
+                                </a>
+                                <a href="{% url 'pjapp:author:explore_activity' pk=activity_block.activity_id %}">
+                                    <i class="fa fa-calendar-check-o"></i>
+                                    {{activity_block.activity.title}}
+                                </a>
+                            </h3>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+                {% if unsorted_activities.count %}
+                <li class="path-line">
+                    <ul>
+                    {% for activity_block in unsorted_activities %}
+                        <li class="path-block activity-block" data-activity-id="{{activity_block.activity_id}}">
+                            <h3>
+                                <a href="#" class="join-path">
+                                    <i class="fa fa-share-alt"></i>
+                                </a>
+                                <a href="{% url 'pjapp:author:explore_activity' pk=activity_block.activity_id %}">
+                                    <i class="fa fa-calendar-check-o"></i>
+                                    {{activity_block.activity.title}}
+                                </a>
+                            </h3>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+                <li class="path-line">
+                    <div class="path-block end-block" data-activity-id="_END_">
+                        <h3>
+                            <a href="#" class="join-path">
+                                <i class="fa fa-share-alt"></i>
+                            </a>
+                            <i class="fa fa-flag-checkered"></i>
+                            End of trajectory
+                        </h3>
+                    </div>
+                </li>
+            </ul>
+            <ul class="path-link-buttons">
+                {% for link in links %}
+                <li class="link-button" data-link-id="{{link.id}}" title="link from {{link.get_from_activity_title}} to {{link.get_to_activity_title}}">
+                    <i class="fa fa-trash"></i>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if path.get_unused_activities.count %}
+        <p>
+            <i class="fa fa-calendar-check-o"></i>
+            Activities not used in this path:
+        </p>
+        <ul class="unused-activities">
+            {% for activity in path.get_unused_activities %}
+            <li class="unused-activity-block" data-activity-id="{{activity.id}}">
+                <h3>
+                    <a href="#" class="join-path">
+                        <i class="fa fa-share-alt"></i>
+                    </a>
+                    <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}">
+                        <i class="fa fa-calendar-check-o"></i>
+                        {{activity.title}}
+                    </a>
+                </h3>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="post" action="{% url 'pjapp:author:create_link' %}" id="add-link-form">
+            {% csrf_token %}
+            <input type="hidden" name="path_id" value="{{path.id}}">
+            <input type="hidden" name="from_id" value="">
+            <input type="hidden" name="to_id" value="">
+        </form>
+        <form method="post" action="{% url 'pjapp:author:delete_link' %}" id="remove-link-form">
+            {% csrf_token %}
+            <input type="hidden" name="link_id" value="">
+        </form>
+    </div>
+    <div class="column">
+        <h2>
+            <i class="fa fa-line-chart"></i>
+            About the trajectory
+        </h2>
+        <p>
+            <a href="{% url 'pjapp:author:edit_path' pk=path.id %}">
+                <i class="fa fa-pencil fa-fw"></i>
+                Edit trajectory title, description, tags and annotations
+            </a>
+        </p>
+        <p>To create links between activities, click on the <i class="fa fa-share-alt"></i> icon on the source activity, then on the target activity</p>
+        <p class="metadata-field">
+            <i class="fa fa-list-alt fa-fw"></i>
+            Description:
+        </p>
+        <div class="rich-content">
+            {{path.description|safe}}
+        </div>
+        {% if path.annotations %}
+        <p class="metadata-field">
+            <i class="fa fa-sticky-note fa-fw"></i>
+            My annotations:
+        </p>
+        <div class="rich-content">
+            {{path.annotations}}
+        </div>
+        {% endif %}
+        <table class="item-metadata">
+            <tr>
+                <th>
+                {% if path.listed_publicly %}
+                    <i class="fa fa-unlock fa-fw"></i>
+                {% else %}
+                    <i class="fa fa-lock fa-fw"></i>
+                {% endif %}
+                    Visibility:
+                </th>
+                <td>
+                {% if path.listed_publicly %}
+                    All Protojourneys users
+                {% else %}
+                    Only users provided with link below
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-link fa-fw"></i>
+                    Share URL:
+                </th>
+                <td>
+                    <input type="text" value="{{share_url}}" class="copiable-input" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-eye fa-fw"></i>
+                    Preview:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:play:start_path' slug=path.slug %}" title="Preview in normal window">
+                        Web
+                        <i class="fa fa-globe"></i>
+                    </a>
+                    &ensp;
+                    <a href="{% url 'pjapp:fake_mobile' %}?url={% url 'pjapp:play:start_path' slug=path.slug %}" title="Preview in fake mobile phone">
+                        Mobile
+                        <i class="fa fa-mobile"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-tags fa-fw"></i>
+                    Tags:
+                </th>
+                <td>
+                    {% if path.tags.count %}
+                    <ul class="item-tag-list">
+                        {% for tag in path.tags.all %}
+                        <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-folder-open-o fa-fw"></i>
+                    Project:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:author:explore_project' pk=path.project.id %}">{{path.project.title}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    Activity count:
+                </th>
+                <td>{{path.get_activities.count}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-users fa-fw"></i>
+                    Usage:
+                </th>
+                <td>
+                    Trajectory taken {{path.recorded_instances.count}} time(s) by {{user_count}} user(s)
+                    <br /><a href="{% url 'pjapp:author:path_usage_details' pk=path.id %}">See details</a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Created:
+                </th>
+                <td>{{path.date_created|naturaltime}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Last updated:
+                </th>
+                <td>{{path.date_updated|naturaltime}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,88 @@
+.review-list {
+    text-align: center;
+    margin: 1em 0;
+}
+
+.review-list li {
+    border-width: 2px;
+    border-style: solid;
+    margin: 0 auto;
+    padding: .2em 0;
+}
+
+.review-list h3 {
+    font-size: 1em;
+    margin: .3em 0;
+    font-weight: 700;
+}
+
+.review-list p {
+    font-size: .9em;
+}
+
+.review-start,
+.review-end {
+    width: 80%;
+}
+
+.review-start {
+    background: #ccffcc;
+    border-color: #999999;
+}
+
+.review-end {
+    background: #ffcccc;
+    border-color: #999999;
+}
+
+.review-status-P {
+    background: #FFC080;
+}
+
+.review-status-D {
+    background: #FFFFD0;
+}
+
+.review-status-S {
+    background: #e0e0e0;
+    color: #999999;
+}
+
+.review-activity {
+    width: 70%;
+}
+
+.review-activity.canonical {
+    border-color: #008000;
+}
+
+.review-activity.non-canonical {
+    border-color: #800000;
+}
+
+li.review-activity,
+li.review-end {
+    position: relative;
+    margin-top: 20px;
+}
+
+.review-activity::before,
+.review-end::before {
+    content: "";
+    height: 20px;
+    width: 2px;
+    border-width: 2px;
+    border-style: none solid none none;
+    border-color: inherit;
+    position: absolute;
+    top: -22px;
+    margin-left: -1px;
+}
+
+.review-activity.non-canonical::before {
+    border-style: none dotted none none;
+}
+
+.step-counter {
+    float: left;
+}

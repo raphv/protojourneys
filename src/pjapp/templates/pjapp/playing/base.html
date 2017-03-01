@@ -1,0 +1,7 @@
+{% extends "pjapp/base.html" %}
+
+{% block body_class %}playing{% endblock %}
+
+{% block home_link_a %}<a href="{% url 'pjapp:play:home' %}" class="home-link" title="Protojourneys Player Home">{% endblock %}
+
+{% block home_link_b %}<a href="{% url 'pjapp:play:home' %}" title="Protojourneys Player Home" class="global-title">Protojourneys Player{% endblock %}

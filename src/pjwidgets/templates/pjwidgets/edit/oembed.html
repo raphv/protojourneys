@@ -1,0 +1,136 @@
+{% extends 'pjapp/authoring/base_form.html' %}
+
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}Editing oEmbed widget{% endblock %}
+{% block title_page_name %}Editing oEmbed widget{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<style type="text/css">
+    .embed-results .errors {
+        color: #ff0000;
+        font-style: italic;
+    }
+    .embed-results .loading {
+        text-align: center;
+        font-weight: 100;
+        font-size: 1.2em;
+    }
+    .refresh-block {
+        display: none;
+    }
+</style>
+<script>
+$(function() {
+    function allowSave() {
+        $('.submit-container').toggle(embedFound);
+    }
+    function getEmbed(forceRefresh) {
+        var url = $('#id_url').val();
+        $.ajax({
+            url: "{% url 'pjwidgets:ajax_oembed' %}",
+            type: 'post',
+            data: {
+                url: url,
+                force: forceRefresh || undefined
+            },
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            success: function(data) {
+                if (data.success) {
+                    var $h2 = $('<h2>');
+                    $('<a>').attr({href: url, target: '_blank'}).text(data.results.title).appendTo($h2);
+                    if (data.results.provider_name) {
+                        $('<span>').text(' via ' + data.results.provider_name).appendTo($h2);
+                    }
+                    var html = $('<div>').append($h2).html() + '<div class="rich-content">' + data.results.html + '</div>';
+                    $('div.embed-results').html(html);
+                    $('#id_title').val(data.results.title);
+                    embedFound = true;
+                } else {
+                    var $p = $('<p class="errors">').text('Embedded media could not be retrieved ['+data.message+']');
+                    $('.embed-results').html($p);
+                    embedFound = false;
+                }
+                $('.refresh-block').show();
+                allowSave();
+            }
+        });
+        var $p = $('<p class="loading">').text('Loading results for "'+url+'"');
+        $('.embed-results').html($p);
+        $('#id_title').val('');
+        allowSave();
+    }
+    $('.find-embed').click(function() {
+        getEmbed(false);
+        return false;
+    });
+    $('.force-refresh').click(function() {
+        getEmbed(true);
+        return false;
+    });
+    embedFound = /^https?:\/\//.test($('#id_url').val());
+    allowSave();
+    $('#id_url').change(function() {
+        $('#id_title').val('');
+        $('.embed-results').empty();
+        embedFound = false;
+        allowSave();
+        $('.refresh-block').hide();
+    });
+    $('form').submit(function() {
+        if (!embedFound) {
+            getEmbed(false);
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+        <a class="find-embed" href="#">
+            <i class="fa fa-search"></i>
+            Get embedded media
+        </a>
+    </p>
+    <p class="refresh-block">
+        <a class="force-refresh" href="#">
+            <i class="fa fa-refresh"></i>
+            <i class="fa fa-globe"></i>
+            Clear cache and force reload from source
+        </a>
+    </p>
+    <div class="embed-results">
+    {% if widget.oembed.title %}
+        <h2>
+            <a href="{{widget.oembed.url}}" target="_blank">{{widget.oembed.title}}</a>
+            {% if oembedhtml.provider_name %}
+            <span>via {{oembedhtml.provider_name}} (retrieved {{oembedhtml.last_updated|naturaltime}})</span>
+            {% endif %}
+        </h2>
+    {% endif %}
+    {% if oembedhtml.embed_html %}
+        <div class="rich-content">{{oembedhtml.get_embed_html}}</div>
+    {% endif %}
+    </div>
+    <p class="submit-container">
+        <input type="submit" value="Save media embed widget" />
+    </p>
+</form>
+
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

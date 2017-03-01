@@ -1,0 +1,314 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}
+    <i class="fa fa-folder-open-o"></i>
+    Project “{{project.title}}”
+{% endblock %}
+{% block title_page_name %}Project “{{project.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<script type="text/javascript" src="{% static "pjapp/script/tagged-explorer.js" %}"></script>
+<script>
+    $(function() {
+       $('.activity-list a.delete-button').click(function() {
+           var $activity = $(this).parents('li.activity'),
+               id = $activity.attr('data-activity-id'),
+               title = $activity.find('.title-name').text().trim();
+           if (confirm('Do you really wish to delete activity "' + title + '"')) {
+               $('#delete-activity-id').val(id);
+               $('#delete-activity-form').submit();
+           }
+           return false;
+       });
+       $('.path-list a.delete-button').click(function() {
+           var $path = $(this).parents('li.path'),
+               id = $path.attr('data-path-id'),
+               title = $path.find('.title-name').text().trim();
+           if (confirm('Do you really wish to delete trajectory "' + title + '"')) {
+               $('#delete-path-id').val(id);
+               $('#delete-path-form').submit();
+           }
+           return false;
+       });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2><i class="fa fa-folder-open-o"></i> About the project</h2>
+        <p>
+            <a href="{% url 'pjapp:author:edit_project' pk=project.id %}">
+                <i class="fa fa-pencil fa-fw"></i>
+                Edit project title, description, tags and annotations
+            </a>
+        </p>
+        <p class="metadata-field">
+            <i class="fa fa-list-alt fa-fw"></i>
+            Description:
+        </p>
+        <div class="rich-content">
+            {{project.description|safe}}
+        </div>
+        {% if project.annotations %}
+        <p class="metadata-field">
+            <i class="fa fa-sticky-note fa-fw"></i>
+            My annotations:
+        </p>
+        <div class="rich-content">
+            {{project.annotations}}
+        </div>
+        {% endif %}
+        <table class="item-metadata">
+            <tr>
+                <th>
+                    <i class="fa fa-line-chart fa-fw"></i>
+                    Trajectories:
+                </th>
+                <td>
+                    <a href="#trajectories">{{project.paths.count}}</a>
+                    <a href="{% url 'pjapp:author:create_path' pk=project.id %}" title="Create a new trajectory">
+                        <i class="fa fa-plus-circle"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    Activities:
+                </th>
+                <td>
+                    <a href="#activities">{{project.activities.count}}</a>
+                    <a href="{% url 'pjapp:author:create_activity' pk=project.id %}" title="Create a new activity">
+                        <i class="fa fa-plus-circle"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-tags fa-fw"></i>
+                    Tags:
+                </th>
+                <td>
+                    {% if project.tags.count %}
+                    <ul class="item-tag-list">
+                        {% for tag in project.tags.all %}
+                        <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Creator:
+                </th>
+                <td>{{project.creator}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Created:
+                </th>
+                <td>{{project.date_created|naturaltime}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Last updated:
+                </th>
+                <td>{{project.date_updated|naturaltime}}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="column">
+        <h2 id="trajectories">
+            <i class="fa fa-line-chart"></i>
+            Trajectories in the project ({{project.paths.count}})
+        </h2>
+        <p>
+            <a href="{% url 'pjapp:author:create_path' pk=project.id %}">
+                <i class="fa fa-plus-circle"></i>
+                <i class="fa fa-line-chart"></i>
+                Create a new trajectory
+            </a>
+        </p>
+        <form method="post" action="{% url 'pjapp:author:delete_path' %}" id="delete-path-form">
+            {% csrf_token %}
+            <input type="hidden" name="trajectory_id" id="delete-path-id" value="" autocomplete="off" />
+            <input type="hidden" name="next" value="{{request.get_full_path|urlencode}}" autocomplete="off" />
+        </form>
+        {% if project.paths.count %}
+        <div class="path-explorer tagged-explorer">
+        {% if project.paths.count > 1 %}
+            <p>
+                <i class="fa fa-search"></i>
+                <input class="explorer-search" type="text" autocomplete="off" placeholder="Search in trajectories" />
+                <a class="empty-explorer-search" href="#">
+                    <i class="fa fa-times"></i>
+                </a>
+            </p>
+            {% if path_tags.count %}
+            <ul class="filter-tag-list">
+                <li class="filter-tag-list-title">
+                    <i class="fa fa-filter"></i>
+                    Filter by tag:
+                </li>
+                {% for tag in path_tags %}
+                <li class="filter-tag" data-tag-id="{{ tag.id }}">
+                    <a href="#" onclick="return false;">{{tag.text}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endif %}
+            <ul class="path-list item-list">
+                {% for path in project.paths.all %}
+                <li class="path item" data-path-id="{{path.id}}" data-search-index="{{path.title|lower}} {{path.flat_tag_list|lower}} {{path.get_description_text|lower}}">
+                    <h3 class="item-title">
+                        <i class="fa fa-line-chart"></i>
+                        <a href="{% url 'pjapp:author:explore_path' pk=path.id %}" class="title-name" title="Explore trajectory">{{path.title}}</a>
+                        <a href="{% url 'pjapp:author:edit_path' pk=path.id %}" title="Edit trajectory">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <a href="#" class="delete-button" title="Delete trajectory">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </h3>
+                    <p class="item-description">
+                        {{path.get_description_text|truncatechars:100}}
+                    </p>
+                    <table class="item-metadata">
+                        <tr>
+                            <th>
+                                <i class="fa fa-tags fa-fw"></i>
+                                Tags:
+                            </th>
+                            <td>
+                                {% if path.tags.count %}
+                                <ul class="item-tag-list">
+                                    {% for tag in path.tags.all %}
+                                    <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="fa fa-clock-o fa-fw"></i>
+                                Created:
+                            </th>
+                            <td>{{path.date_created|naturaltime}}</td>
+                        </tr>
+                    </table>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <p>There are currently no trajectories in this project</p>
+        {% endif %}
+        <h2 id="activities">
+            <i class="fa fa-calendar-check-o"></i>
+            Activities in the project ({{project.activities.count}})
+        </h2>
+        <p>
+            <a href="{% url 'pjapp:author:create_activity' pk=project.id %}">
+                <i class="fa fa-plus-circle"></i>
+                <i class="fa fa-calendar-check-o"></i>
+                Create a new activity
+            </a>
+        </p>
+        <form method="post" action="{% url 'pjapp:author:delete_activity' %}" id="delete-activity-form">
+            {% csrf_token %}
+            <input type="hidden" name="activity_id" id="delete-activity-id" value="" autocomplete="off" />
+            <input type="hidden" name="next" value="{{request.get_full_path|urlencode}}" autocomplete="off" />
+        </form>
+        {% if project.activities.count %}
+        <div class="activity-explorer tagged-explorer">
+        {% if project.activities.count > 1 %}
+            <p>
+                <i class="fa fa-search"></i>
+                <input class="explorer-search" type="text" autocomplete="off" placeholder="Search in activities" />
+                <a class="empty-explorer-search" href="#">
+                    <i class="fa fa-times"></i>
+                </a>
+            </p>
+            {% if activity_tags.count %}
+            <ul class="filter-tag-list">
+                <li class="filter-tag-list-title">
+                    <i class="fa fa-filter"></i>
+                    Filter by tag:
+                </li>
+                {% for tag in activity_tags %}
+                <li class="filter-tag" data-tag-id="{{ tag.id }}">
+                    <a href="#" onclick="return false;">{{tag.text}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endif %}
+            <ul class="activity-list item-list">
+                {% for activity in project.activities.all %}
+                <li class="item activity" data-activity-id="{{activity.id}}" data-search-index="{{activity.title|lower}} {{activity.flat_tag_list|lower}} {{activity.get_description_text|lower}}">
+                    <h3 class="item-title">
+                        <i class="fa fa-calendar-check-o"></i>
+                        <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}" class="title-name" title="Explore activity">{{activity.title}}</a>
+                        <a href="{% url 'pjapp:author:edit_activity' pk=activity.id %}" title="Edit activity">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <a href="#" class="delete-button" title="Delete activity">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </h3>
+                    <p class="item-description">
+                        {{activity.get_description_text|truncatechars:100}}
+                    </p>
+                    <table class="item-metadata">
+                        <tr>
+                            <th>
+                                <i class="fa fa-tags fa-fw"></i>
+                                Tags:
+                            </th>
+                            <td>
+                                {% if activity.tags.count %}
+                                <ul class="item-tag-list">
+                                    {% for tag in activity.tags.all %}
+                                    <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="fa fa-clock-o fa-fw"></i>
+                                Created:
+                            </th>
+                            <td>{{activity.date_created|naturaltime}}</td>
+                        </tr>
+                    </table>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <p>There are currently no activities in this project</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

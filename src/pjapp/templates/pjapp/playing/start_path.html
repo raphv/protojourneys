@@ -1,0 +1,170 @@
+{% extends "pjapp/playing/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}Start trajectory “{{path.title}}”{% endblock %}
+{% block title_page_name %}Start trajectory “{{path.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/player.css" %}">
+<script src="{% static "pjapp/script/player.js" %}"> </script>
+{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2>
+            <i class="fa fa-line-chart"></i>
+            About the trajectory
+        </h2>
+        <p class="metadata-field">
+            This trajectory is made of {{path.get_activities.count}} activities and {{path.links.count}} links between activities.
+        </p>
+        <p class="metadata-field">
+            <i class="fa fa-list-alt fa-fw"></i>
+            Description:
+        </p>
+        <div class="rich-content">
+            {{path.description|safe}}
+        </div>
+        <table class="item-metadata">
+            {% if path.tags.count %}
+            <tr>
+                <th>
+                    <i class="fa fa-tags fa-fw"></i>
+                    Tags:
+                </th>
+                <td>
+                    <ul class="item-tag-list">
+                        {% for tag in path.tags.all %}
+                        <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Creator:
+                </th>
+                <td>{{path.project.creator}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Created:
+                </th>
+                <td>{{path.date_created|naturaltime}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Last updated:
+                </th>
+                <td>{{path.date_updated|naturaltime}}</td>
+            </tr>
+        </table>
+        <img class="pathmap" src="{% url 'pjapp:svg_path' path_pk=path.id %}"/>
+    </div>
+    <div class="column">
+        {% if ongoing_paths %}
+        <h2>
+            <i class="fa fa-arrow-right"></i>
+            You are currently playing {{ongoing_paths.count}} instance(s) of this trajectory
+        </h2>
+        <ul class="item">
+            <h3>Click on a trajectory to continue playing it</h3>
+            {% for trajectory in ongoing_paths %}
+            <li class="recorded-path" data-recorded-path-id="{{trajectory.id}}">
+                <p>
+                    <a class="title-name" href="{% url 'pjapp:play:resume_path' pk=trajectory.id %}" title="Continue recorded trajectory">
+                        <i class="fa fa-play"></i>
+                        {{trajectory.title}}
+                    </a>
+                    started {{trajectory.date_started|naturaltime}}
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <h2>Play this trajectory from the start</h2>
+        <p>
+            <i class="fa fa-exclamation-circle"></i>
+            Your activity will be recorded. You will be able to review it and remove it from the home page.
+        </p>
+        <form id="next-form" method="post" action="{% url 'pjapp:play:start_path_next' %}">
+            {% csrf_token %}
+            <p>
+                <label>
+                    <i class="fa fa-pencil"></i>
+                    Name this trajectory:
+                </label>
+                <input type="text" name="title" placeholder="Give it a name to remember it"/>
+            </p>
+            <input type="hidden" name="path-id" value="{{path.id}}" />
+            <input type="hidden" name="next-activity-id" value="" id="next-activity-field" />
+            <input type="hidden" name="custom-activity-id" value="" id="custom-activity-field" />
+            <input type="hidden" name="is-canonical" value="" id="canonical-field" />
+            <h2>
+                <i class="fa fa-play-circle-o"></i>
+                Visit the first step:
+            </h2>
+            {% if destinations.count > 1 %}
+            <h3>
+                <i class="fa fa-sitemap"></i>
+                You have multiple choices for the first step:
+            </h3>
+            {% endif %}
+            <ul>
+            {% for destination in destinations %}
+                <li>
+                    <button class="destbutton base-destination" data-activity-id="{{destination.id}}" data-is-canonical="1">
+                        <i class="fa fa-play"></i>
+                        {{destination.title}}
+                    </button>
+                </li>
+            {% endfor %}
+            </ul>
+            {% if other_destinations|length %}
+            <p>
+                <a href="#" class="show-non-canonical">
+                    <i class="fa fa-chevron-circle-down"></i>
+                    Show alternative (unplanned) options
+                </a>
+            </p>
+            <ul id="non-canonical">
+                {% for destination in other_destinations %}
+                <li>
+                    <button class="destbutton base-destination" data-activity-id="{{destination.id}}" data-is-canonical="0">
+                        <i class="fa fa-play"></i>
+                        {{destination.title}}
+                    </button>
+                </li>
+                {% endfor %}
+                {% for destination in custom_destinations %}
+                <li>
+                    <button class="destbutton custom-destination" data-custom-activity-id="{{destination.id}}">
+                        <i class="fa fa-play"></i>
+                        {{destination.title}}
+                    </button>
+                </li>
+                {% endfor %}
+                <li>
+                    <button class="destbutton create-custom-destination">
+                        <i class="fa fa-pencil"></i>
+                        Create your own next step
+                    </button>
+                </li>
+                <li>
+                    <em>Use the option above to report on activities that aren't mentioned in the list above and that you think are part of the trajectory.</em>
+                </li>
+            </ul>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+

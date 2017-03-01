@@ -1,0 +1,18 @@
+{% extends "pjapp/authoring/base.html" %}
+
+{% block page_name %}Preview {{widget}}{% endblock %}
+{% block title_page_name %}Preview {{widget}}{% endblock %}
+
+{% load widgets %}
+
+{% block content %}
+    {% render_widget widget %}
+    
+<h2>
+    <a href="{% url 'pjapp:author:explore_activity' pk=widget.activity_id %}">
+        <i class="fa fa-arrow-left"></i>
+        <i class="fa fa-calendar-check-o"></i>
+        Back to activity
+    </a>
+</h2>
+{% endblock %}

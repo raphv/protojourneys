@@ -1,0 +1,10 @@
+.project
+.pydevproject
+.settings
+*.pyc
+*.pyo
+src/pjsite/settings.py
+!.keepme
+www
+env
+.vscode

@@ -1,0 +1,125 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load humanize %}
+
+{% block page_name %}<i class="fa fa-line-chart"></i> Usage details for “{{path.title}}”{% endblock %}
+{% block title_page_name %}Usage details for “{{path.title}}”{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2>
+            <a href="{% url 'pjapp:author:explore_path' pk=path.id %}">Back to trajectory</a>
+        </h2>
+        <table class="item-metadata">
+            <tr>
+                <th>
+                    <i class="fa fa-hashtag fa-fw"></i>
+                    Instances:
+                </th>
+                <td>
+                    Taken {{path.recorded_instances.count}} time(s)
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-users fa-fw"></i>
+                    Users:
+                </th>
+                <td>
+                    Taken by {{user_count}} user(s)
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-sitemap fa-fw"></i>
+                    Steps:
+                </th>
+                <td>
+                    {{stepcount}} total steps taken
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    Activities:
+                </th>
+                <td>
+                    {{activitycount}} activities out of {{path.get_activities.count}} taken
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Custom activities:
+                </th>
+                <td>
+                    {{customactivities}} user-defined activities
+                </td>
+            </tr>
+        </table>
+        <h2>
+            <i class="fa fa-calendar-check-o"></i>
+            Most popular activities
+        </h2>
+        <ol>
+            {% for activity in popular_activities %}
+            <li>
+                {{forloop.counter}}.
+                <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}">{{activity.title}}</a>
+                (taken {{activity.step_count}} times)
+            </li>
+            {% endfor %}
+        </ol>
+        <h2>
+            <i class="fa fa-random"></i>
+            Individual trajectories taken
+        </h2>
+        <ul>
+            {% for instance in path.recorded_instances.all %}
+            <li class="item">
+                <p>
+                    <a href="{% url 'pjapp:author:review_path' pk=instance.id %}">
+                        <i class="fa fa-eye"></i>
+                        {{instance.title}}
+                    </a>
+                </p>
+                <p>
+                    Taken by
+                    {{instance.user.username}},
+                    started
+                    {{instance.date_started|naturaltime}}
+                </p>
+                {% if instance.is_ongoing %}
+                <p>
+                    <i class="fa fa-arrow-right"></i>
+                    In progress
+                {% else %}
+                <p>
+                    <i class="fa fa-clock-o"></i>
+                    Ended {{instance.date_started|naturaltime}}
+                {% endif %}
+                    &mdash; {{instance.steps.count}} step(s)
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="column">
+        <h2>
+            <i class="fa fa-comments"></i>
+            Comments on this trajectory ({{comments.count}})
+        </h2>
+        {% if comments.count %}
+        <ul class="comment-list item-list">
+            {% for comment in comments %}
+                {% include 'pjapp/partials/comment.html' %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>There are currently no comments on this trajectory</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,90 @@
+<style type="text/css">
+    h3.artcode-header {
+        font-size: 1.2em;
+    }
+    ul.artcode-actions {
+        display: inline-block;
+        width: 100%;
+        margin: 10px;
+    }
+    .artcode-actions li {
+        margin: 5px 0;
+        background: #f8fff8;
+        box-shadow: 2px 2px 4px #ccd8cc;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 1.1em;
+        border-radius: 5px;
+        text-align: center;
+    }
+    @media (min-width:600px) {
+        .artcode-actions li {
+            float: left;
+            width: 300px;
+            margin: 5px 10px 5px 0;
+        }
+    }
+</style>
+{% if widget.title %}
+    <h2>{{widget.title}}</h2>
+{% endif %}
+{% if scanqr_instance.code %}
+    <h3 class="artcode-header" style="color: #008000;">
+        <i class="fa fa-check-circle"></i>
+        You have scanned a code!
+    </h3>
+    {% if scanqr_instance.title %}
+    <h3>{{scanqr_instance.title}}</h3>
+    {% endif %}
+    {% if scanqr_instance.code.contents %}
+    <div class="rich-content">
+        {{scanqr_instance.code.contents|safe}}
+    </div>
+    {% endif %}
+{% else %}
+    <h3 class="artcode-header" style="color: #800000;">
+        <i class="fa fa-times-circle"></i>
+        You have not scanned a code yet!
+    </h3>
+{% if show_app %}
+    <h3 class="artcode-header">
+        Do you have the Artcodes app?
+    </h3>
+    <ul class="artcode-actions">
+        {% if is_android %}
+        <li>
+            <a href="https://play.google.com/store/apps/details?id=uk.ac.horizon.aestheticodes" target="_blank">
+                <p>
+                    <i class="fa fa-2x fa-android"></i>
+                </p>
+                <p>
+                    Get the Android app!
+                </p>
+            </a>
+        </li>
+        {% else %}
+        <li>
+            <a href="https://itunes.apple.com/gb/app/artcodes/id703429621" target="_blank">
+                <p>
+                    <i class="fa fa-2x fa-apple"></i>
+                </p>
+                <p>
+                    Get the iPhone app!
+                </p>
+            </a>
+        </li>
+        {% endif %}
+        <li>
+            <a href="{% url 'pjwidgets:artcode_experience' project_id=widget.activity.project_id %}" target="_blank">
+                <p>
+                    <i class="fa fa-2x fa-download"></i>
+                </p>
+                <p>
+                    Once you've installed it, click here to install the Artcode Experience on your mobile phone.
+                </p>
+            </a>
+        </li>
+    </ul>
+{% endif %}
+{% endif %}
+

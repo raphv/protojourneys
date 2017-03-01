@@ -1,0 +1,133 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}Review “{{recpath.title}}”{% endblock %}
+{% block title_page_name %}Review “{{recpath.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/review.css" %}">
+<style type="text/css">
+    .custom-activity {
+        display: none;
+    }
+</style>
+<script>
+    $(function() {
+        $('.toggle-custom-activity').click(function() {
+            $(this).parents('li.review-activity').find('div.custom-activity').toggle();
+            return false;
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <table class="item-metadata">
+            <tr>
+                <th>
+                    <i class="fa fa-line-chart fa-fw"></i>
+                    Original trajectory:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:author:explore_path' pk=recpath.path.id %}">{{recpath.path.title}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Taken by:
+                </th>
+                <td>
+                    {{user.username}}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-folder-open-o fa-fw"></i>
+                    Project:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:author:explore_project' pk=recpath.path.project.id %}">{{recpath.path.project.title}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Creator:
+                </th>
+                <td>{{recpath.path.project.creator}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    Activities done:
+                </th>
+                <td>{{recpath.get_done_activities}} out of {{recpath.get_total_activities}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-question-circle fa-fw"></i>
+                    Status:
+                </th>
+                <td>{{recpath.get_status}}</td>
+            </tr>
+        </table>
+        <h2>Compare with canonical trajectory</h2>
+        <img class="pathmap" src="{% url 'pjapp:svg_path' recorded_path_pk=recpath.id %}"/>
+        <h2>
+            <i class="fa fa-comments"></i>
+            Comments on this trajectory ({{comments.count}})
+        </h2>
+        <ul class="comment-list">
+            {% for comment in comments.all %}
+                {% include 'pjapp/partials/comment.html' %}
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="column">
+        <ul class="review-list">
+            <li class="review-start">
+                <h3>Start of path</h3>
+                <p>Started {{recpath.date_started|naturaltime}}</p>
+            </li>
+            {% for step in recpath.steps.all %}
+            <li class="review-activity review-status-{{step.status}} {{step.is_canonical|yesno:'canonical,non-canonical'}}">
+                {% if step.has_custom_activity %}
+                <h3>
+                    {{forloop.counter}}.
+                    {{step.custom_activity.title}} (<a href="#" class="toggle-custom-activity">Custom activity</a>)
+                </h3>
+                <div class="custom-activity">
+                    {{step.custom_activity.get_description_html}}
+                </div>
+                {% else %}
+                <h3>
+                    {{forloop.counter}}.
+                    <a href="{% url 'pjapp:author:explore_activity' pk=step.activity_id %}">{{step.activity.title}}</a>
+                </h3>
+                {% endif %}
+                <p>
+                    Started {{step.date_started|naturaltime}}
+                    &mdash;
+                    {{step.get_status_display}}
+                    {% if step.status != 'P' %}
+                    {{step.date_ended|naturaltime}}
+                    {% endif %}
+                </p>
+            </li>
+            {% endfor %}
+            {% if not recpath.is_ongoing %}
+            <li class="review-end">
+                <h3>End of trajectory</h3>
+                <p>Finished {{recpath.date_ended|naturaltime}}</p>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

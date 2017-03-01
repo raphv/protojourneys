@@ -1,0 +1,276 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load thumbnail %}
+{% load widgets %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/comment-base.css" %}">
+<script type="text/javascript" src="{% static "pjapp/script/tagged-explorer.js" %}"></script>
+<script type="text/javascript" src="{% static "pjapp/script/comment-base.js" %}"></script>
+<script>
+    $(function() {
+        $('a.delete-widget').click(function() {
+            var id = $(this).parents('li.widget').attr('data-widget-id');
+            $('#delete-widget-id').val(id);
+            $('#delete-widget-form').submit();
+        });
+        $('a.move-widget-up').click(function() {
+            var id = $(this).parents('li.widget').attr('data-widget-id');
+            $('#move-widget-id').val(id);
+            $('#move-widget-direction').val('up');
+            $('#move-widget-form').submit();
+        });
+        $('a.move-widget-down').click(function() {
+            var id = $(this).parents('li.widget').attr('data-widget-id');
+            $('#move-widget-id').val(id);
+            $('#move-widget-direction').val('down');
+            $('#move-widget-form').submit();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block page_name %}
+    <i class="fa fa-calendar-check-o"></i>
+    Activity “{{activity.title}}”
+{% endblock %}
+{% block title_page_name %}Activity “{{activity.title}}”{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <p>
+            <a href="{% url 'pjapp:author:create_activity' pk=activity.project.id %}">
+                <i class="fa fa-plus-circle"></i>
+                <i class="fa fa-calendar-check-o"></i>
+                Create another activity
+            </a>
+        </p>
+        <h2>About the activity</h2>
+        <p>
+            <a href="{% url 'pjapp:author:edit_activity' pk=activity.id %}">
+                <i class="fa fa-pencil fa-fw"></i>
+                Edit activity title, description, tags and annotations
+            </a>
+        </p>
+        <p class="metadata-field">
+            <i class="fa fa-list-alt fa-fw"></i>
+            Description:
+        </p>
+        <div class="rich-content">
+            {{activity.description|safe}}
+        </div>
+        <p class="metadata-field">
+            <i class="fa fa-cogs fa-fw"></i>
+            Optional modules:
+        </p>
+        {% if activity.widgets.count %}
+        <form method="post" action="{% url 'pjwidgets:move_widget' %}" id="move-widget-form">
+            {% csrf_token %}
+            <input type="hidden" name="direction" value="" id="move-widget-direction">
+            <input type="hidden" name="widget_id" value="" id="move-widget-id">
+            <input type="hidden" name="next" value="{{request.get_full_path|urlencode}}">
+        </form>
+        <form method="post" action="{% url 'pjwidgets:delete_widget' %}" id="delete-widget-form">
+            {% csrf_token %}
+            <input type="hidden" name="widget_id" value="" id="delete-widget-id">
+            <input type="hidden" name="next" value="{{request.get_full_path|urlencode}}">
+        </form>
+        <ul>
+            {% for widget in activity.widgets.all %}
+            <li class="widget item" data-widget-id="{{widget.id}}">
+                <a href="{% url 'pjwidgets:edit_widget' pk=widget.id %}" title="Edit widget">
+                    {{ widget }}
+                    <i class="fa fa-pencil"></i>
+                </a>
+                <a href="{% url 'pjwidgets:preview_widget' pk=widget.id %}" title="Preview module">
+                    <i class="fa fa-eye"></i>
+                </a>
+                {% if not forloop.first %}
+                <a href="#" class="move-widget-up" title="Move widget up">
+                    <i class="fa fa-arrow-up"></i>
+                </a>
+                {% endif %}
+                {% if not forloop.last %}
+                <a href="#" class="move-widget-down" title="Move widget down">
+                    <i class="fa fa-arrow-down"></i>
+                </a>
+                {% endif %}
+                <a href="#" class="delete-widget" title="Delete widget">
+                    <i class="fa fa-trash"></i>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="post" class="widget-selector item" action="{% url 'pjwidgets:add_widget' %}">
+            {% csrf_token %}
+            <input type="hidden" name="activity_id" value="{{activity.id}}"/>
+            <label>Add a widget:</label>
+            {% widget_selector %}
+            <input type="submit" value="Add" />
+        </form>
+        {% if activity.annotations %}
+        <p class="metadata-field">
+            <i class="fa fa-sticky-note fa-fw"></i>
+            My annotations:
+        </p>
+        <div class="rich-content">
+            {{activity.annotations}}
+        </div>
+        {% endif %}
+        <table class="item-metadata">
+            <tr>
+                <th>
+                    <i class="fa fa-eye fa-fw"></i>
+                    Preview:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:author:preview_activity' pk=activity.id %}" title="Preview in normal window">
+                        Web
+                        <i class="fa fa-globe"></i>
+                    </a>
+                    &ensp;
+                    <a href="{% url 'pjapp:fake_mobile' %}?url={% url 'pjapp:author:preview_activity' pk=activity.id %}" title="Preview in fake mobile phone">
+                        Mobile
+                        <i class="fa fa-mobile"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-tags fa-fw"></i>
+                    Tags:
+                </th>
+                <td>
+                    {% if activity.tags.count %}
+                    <ul class="item-tag-list">
+                        {% for tag in activity.tags.all %}
+                        <li class="item-tag">{{tag.text}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-folder-open-o fa-fw"></i>
+                    Project:
+                </th>
+                <td>
+                    <a href="{% url 'pjapp:author:explore_project' pk=activity.project.id %}">{{activity.project.title}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Created:
+                </th>
+                <td>{{activity.date_created|naturaltime}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-clock-o fa-fw"></i>
+                    Last updated:
+                </th>
+                <td>{{activity.date_updated|naturaltime}}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="column">
+        <h2>
+            <i class="fa fa-line-chart"></i>
+            Trajectories using this activity ({{paths.count}})
+        </h2>
+        {% if paths.count %}
+        <div class="path-explorer tagged-explorer">
+        {% if paths.count > 1 %}
+            <p>
+                <i class="fa fa-search"></i>
+                <input class="explorer-search" type="text" autocomplete="off" placeholder="Search in trajectories" />
+                <a class="empty-explorer-search" href="#">
+                    <i class="fa fa-times"></i>
+                </a>
+            </p>
+            {% if tags.count %}
+            <ul class="filter-tag-list">
+                <li class="filter-tag-list-title">
+                    <i class="fa fa-filter"></i>
+                    Filter by tag:
+                </li>
+                {% for tag in tags %}
+                <li class="filter-tag" data-tag-id="{{ tag.id }}">
+                    <a href="#" onclick="return false;">{{tag.text}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endif %}
+            <ul class="path-list item-list">
+                {% for path in paths %}
+                <li class="path item" data-path-id="{{path.id}}" data-search-index="{{path.title|lower}} {{path.flat_tag_list|lower}} {{path.get_description_text|lower}}">
+                    <h3 class="item-title">
+                        <i class="fa fa-line-chart"></i>
+                        <a href="{% url 'pjapp:author:explore_path' pk=path.id %}" class="title-name" title="Explore trajectory">{{path.title}}</a>
+                        <a href="{% url 'pjapp:author:edit_path' pk=path.id %}" title="Edit trajectory">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                    </h3>
+                    <p class="item-description">
+                        {{path.get_description_text|truncatechars:100}}
+                    </p>
+                    <table class="item-metadata">
+                        <tr>
+                            <th>
+                                <i class="fa fa-tags fa-fw"></i>
+                                Tags:
+                            </th>
+                            <td>
+                                {% if path.tags.count %}
+                                <ul class="item-tag-list">
+                                    {% for tag in path.tags.all %}
+                                    <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="fa fa-clock-o fa-fw"></i>
+                                Created:
+                            </th>
+                            <td>{{path.date_created|naturaltime}}</td>
+                        </tr>
+                    </table>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <p>There are currently no trajectories using this activity</p>
+        {% endif %}
+        <h2>
+            <i class="fa fa-comments"></i>
+            Comments on this activity ({{comments.count}})
+        </h2>
+        {% if comments.count %}
+        <ul class="comment-list item-list">
+            {% for comment in comments %}
+                {% include 'pjapp/partials/comment.html' %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>There are currently no comments on this activity</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

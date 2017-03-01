@@ -1,0 +1,38 @@
+{% load staticfiles %}
+{% load clientlibs %}
+<script>
+    if (!window.L) {
+        document.write('{% clientlib "leaflet" escape_tags=True %}');
+    }
+    if (!window.jQuery.ui) {
+        document.write('{% clientlib 'jquery-ui' escape_tags=True %}');
+    }
+    if (!window.renderMap) {
+        document.write('\<script src="{% static "pjwidgets/script/render-map.js" %}"\> \</script\>');
+    }
+    
+    window.MAP_DATA_{{widget.id}} = {{map_json|safe}};
+    window.ICON_BASE = "{% static 'pjwidgets/images/map-markers/' %}";
+    $(function() {
+        renderMap("{{widget.id}}");
+    });
+</script>
+<style type="text/css">
+    .map-widget {
+        width: 100%;
+        height: 350px;
+        margin: 1em 0;
+    }
+    .search-map {
+        margin: .3em 0;
+    }
+</style>
+<h2>{{map.title}}</h2>
+<p class="search-map">
+    <label>
+        <i class="fa fa-search"></i>
+        Search location on map:
+    </label>
+    <input type="text" class="map-autocomplete" autocomplete="off" id="map-autocomplete-{{widget.id}}" />
+</p>
+<div class="map-widget" id="map-{{widget.id}}"></div>

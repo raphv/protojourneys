@@ -1,0 +1,118 @@
+{% extends "pjapp/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}<i class="fa fa-pencil"></i> Authoring home{% endblock %}
+{% block title_page_name %}Authoring home{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<script type="text/javascript" src="{% static "pjapp/script/tagged-explorer.js" %}"></script>
+<script>
+    $(function() {
+       $('.project-list a.delete-button').click(function() {
+           var $project = $(this).parents('li.project'),
+               id = $project.attr('data-project-id'),
+               title = $project.find('.title-name').text().trim();
+           if (confirm('Do you really wish to delete project "' + title + '"')) {
+               $('#delete-project-id').val(id);
+               $('#delete-project-form').submit();
+           }
+           return false;
+       });
+    });
+</script>
+{% endblock %}
+
+{% block body_class %}authoring{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2>Welcome to the trajectory author's home page.</h2>
+        <p><em>Trajectories</em> <i class="fa fa-line-chart"></i> are made by connecting <em>activity</em> <i class="fa fa-calendar-check-o"></i> blocks and live within <em>projects</em> <i class="fa fa-folder-open-o"></i>.</p>
+        <p>To create a new trajectory, you'll need to start by creating a project first, then design the activities, or steps that the trajectory goes through and finally connect these steps.</p>
+        <h2>
+            <a href="{% url 'pjapp:author:create_project' %}">
+                <i class="fa fa-plus-circle"></i>
+                <i class="fa fa-folder-open-o"></i>
+                Create a new project!
+            </a>
+        </h2>
+        <form method="post" action="{% url 'pjapp:author:delete_project' %}" id="delete-project-form">
+            {% csrf_token %}
+            <input type="hidden" name="project_id" id="delete-project-id" value="" autocomplete="off" />
+            <input type="hidden" name="next" value="{{request.get_full_path|urlencode}}" autocomplete="off" />
+        </form>
+    </div>
+    <div class="column">
+        <h2>
+            <i class="fa fa-folder-open-o"></i>
+            My projects ({{projects.count}})
+        </h2>
+        <div class="project-explorer tagged-explorer">
+            <p>
+                <i class="fa fa-search"></i>
+                <input class="explorer-search" type="text" autocomplete="off" placeholder="Search in projects" />
+                <a class="empty-explorer-search" href="#">
+                    <i class="fa fa-times"></i>
+                </a>
+            </p>
+            {% if project_tags.count %}
+            <ul class="filter-tag-list">
+                <li class="filter-tag-list-title">
+                    <i class="fa fa-filter"></i>
+                    Filter by tag:
+                </li>
+                {% for tag in project_tags %}
+                <li class="filter-tag" data-tag-id="{{ tag.id }}">
+                    <a href="#" onclick="return false;">{{tag.text}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <ul class="project-list item-list">
+                {% for project in projects %}
+                <li class="project item" data-project-id="{{project.id}}" data-search-index="{{project.title|lower}} {{project.flat_tag_list|lower}} {{project.get_description_text|lower}}">
+                    <h3 class="item-title">
+                        <i class="fa fa-folder-open-o"></i>
+                        <a href="{% url 'pjapp:author:explore_project' pk=project.id %}" class="title-name">{{project.title}}</a>
+                        <a href="{% url 'pjapp:author:edit_project' pk=project.id %}"><i class="fa fa-pencil"></i></a>
+                        <a href="#" class="delete-button"><i class="fa fa-trash"></i></a>
+                    </h3>
+                    <p class="item-description">
+                        {{project.get_description_text|truncatechars:100}}
+                    </p>
+                    <table class="item-metadata">
+                        <tr>
+                            <th>
+                                <i class="fa fa-tags fa-fw"></i>
+                                Tags:
+                            </th>
+                            <td>
+                                {% if project.tags.count %}
+                                <ul class="item-tag-list">
+                                    {% for tag in project.tags.all %}
+                                    <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="fa fa-clock-o fa-fw"></i>
+                                Created:
+                            </th>
+                            <td>{{project.date_created|naturaltime}}</td>
+                        </tr>
+                    </table>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

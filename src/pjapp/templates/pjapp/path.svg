@@ -1,0 +1,112 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+    width="{{fullwidth}}px" height="{{pixelheight}}px"
+    viewBox="0 0 {{fullwidth}} {{pixelheight}}"
+    version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <marker id="arrowend" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0 L0,8 L8,4 z" />
+        </marker>
+    </defs>
+    <style>/* <![CDATA[ */
+        #arrowend path {
+            stroke: none;
+            fill: #404040;
+        }
+        path.block-arrow {
+            stroke: #cccccc;
+        }
+        text.block-name {
+            text-anchor: start;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+        }
+        text.current {
+            fill: #0000ff;
+        }
+        circle.block-circle {
+            stroke: #404040;
+            stroke-width: 1;
+        }
+        .trajectory-start circle.block-circle {
+            fill: #c0ffc0;
+        }
+        .trajectory-end circle.block-circle {
+            fill: #ffc0c0;
+        }
+        .activity circle.block-circle {
+            fill: #ffffc0;
+        }
+        .current circle.block-circle {
+            fill: #ccccff;
+            stroke: #0000ff;
+            stroke-width: 3;
+        }
+        circle.check-circle {
+            fill: #ffffff;
+            stroke: none;
+            opacity: .7;
+        }
+        path.check-mark {
+            fill: none;
+            stroke: #008000;
+            stroke-width: 3;
+        }
+        path.trajectory-path {
+            stroke: #000000;
+            stroke-width: 1;
+            marker-end: url(#arrowend);
+        }
+        path.skip-mark-triangle,
+        rect.skip-mark-bar {
+            fill: #800000;
+        }
+    /* ]]> */</style>
+    <g transform="translate(0 {{start_y}})">
+        <path d="M{{centre_x}} 0L{{arrowright}} 0" class="block-arrow" />
+        <text x="{{textleft}}" y="0" dy="3" class="block-name">Start of trajectory</text>
+    </g>
+    <g transform="translate(0 {{end_y}})">
+        <path d="M{{centre_x}} 0L{{arrowright}} 0" class="block-arrow" />
+        <text x="{{textleft}}" y="0" dy="3" class="block-name">End of trajectory</text>
+    </g>
+    {% for block in blocks %}
+    <g transform="translate(0 {{block.y}})">
+        <path d="M{{block.x}} 0L{{arrowright}} 0" class="block-arrow" />
+        <text x="{{textleft}}" y="0" dy="3" class="block-name{% for status in block.statuses %} {{status}}{% endfor %}">
+            {{block.title|truncatechars:40}}
+        </text>
+    </g>
+    {% endfor %}
+    {% for link in links %}
+    <path d="M{{link.from_x}} {{link.from_y}}L{{link.to_x}} {{link.to_y}}" class="trajectory-path" />
+    {% endfor %}
+    <g transform="translate({{centre_x}} {{start_y}})" title="Start of trajectory" class="trajectory-start {{start_status}}">
+        <circle cx="0" cy="0" r="{{circle_r}}" class="block-circle" />
+        {% if start_status == 'done' %}
+        <circle cx="0" cy="0" r="{{check_circle_r}}" class="check-circle" />
+        <path class="check-mark" d="M-5 -1L-1 3L5 -3" />
+        {% endif %}
+    </g>
+    {% for block in blocks %}
+    <g transform="translate({{block.x}} {{block.y}})" title="{{block.title}}" class="activity{% for status in block.statuses %} {{status}}{% endfor %}">
+        <circle cx="0" cy="0" r="{{circle_r}}" class="block-circle" />
+        {% if 'done' in block.statuses %}
+        <circle cx="0" cy="0" r="{{check_circle_r}}" class="check-circle" />
+        <path class="check-mark" d="M-5 -1L-1 3L5 -3" />
+        {% elif 'skipped' in block.statuses %}
+        <circle cx="0" cy="0" r="{{check_circle_r}}" class="check-circle" />
+        <path class="skip-mark-triangle" d="M-5 -5L1 0L-5 5" />
+        <rect class="skip-mark-bar" x="2" y="-5" width="3" height="10" />
+        {% endif %}
+    </g>
+    {% endfor %}
+    <g transform="translate({{centre_x}} {{end_y}})" title="End of trajectory" class="trajectory-end {{end_status}}">
+        <circle cx="0" cy="0" r="{{circle_r}}" class="block-circle" />
+        {% if end_status == 'done' %}
+        <circle cx="0" cy="0" r="{{check_circle_r}}" class="check-circle" />
+        <path class="check-mark" d="M-5 -1L-1 3L5 -3" />
+        {% endif %}
+    </g>
+</svg>

@@ -1,0 +1,56 @@
+{% extends "pjapp/authoring/base_form.html" %}
+{% load humanize %}
+
+{% block page_name %}
+    <i class="fa fa-pencil"></i>
+    <i class="fa fa-calendar-check-o"></i>
+    Edit activity “{{activity.title}}”
+{% endblock %}
+{% block title_page_name %}Edit activity “{{activity.title}}”{% endblock %}
+
+{% block metadata %}
+<tr>
+    <th>
+        <i class="fa fa-folder-open-o fa-fw"></i>
+        Project:
+    </th>
+    <td>{{activity.project.title}}</td> 
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-clock-o fa-fw"></i>
+        Created:
+    </th>
+    <td>{{activity.date_created|naturaltime}}</td>
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-clock-o fa-fw"></i>
+        Last updated:
+    </th>
+    <td>{{activity.date_updated|naturaltime}}</td>
+</tr>
+<tr>
+    <th>
+        <i class="fa fa-cogs fa-fw"></i>
+        Optional modules:
+    </th>
+    <td>
+        <ul>
+            {% for widget in activity.widgets.all %}
+            <li>
+                <a href="{% url 'pjwidgets:edit_widget' pk=widget.id %}" title="Edit module">
+                    {{ widget.widget_verbose_name }}
+                    <i class="fa fa-pencil"></i>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        <p>
+            <a href="{% url 'pjapp:author:explore_activity' pk=activity.id %}">To add, delete or reorder modules, visit the main activity page</a>
+        </p>
+    </td>
+</tr>
+{% endblock %}
+
+{% block submit_name %}Save activity{% endblock %}

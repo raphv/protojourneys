@@ -1,0 +1,107 @@
+#submit-comment {
+    border: 1px solid #004080;
+    color: #ffffff;
+    background: #4080D0;
+    border-radius: 2px;
+    line-height: 1.6em;
+    padding: 0 .5em;
+    margin: .2em 0;
+}
+
+div.image-and-comment {
+    display: inline-block;
+    width: 100%;
+    clear: both;
+    line-height: 0;
+    margin: .2em 0;
+}
+
+div.image-cell {
+    display: inline-block;
+    width: 22%;
+}
+
+div.comment-cell {
+    float: right;
+    width: 76%;
+}
+
+div.image-button {
+    cursor: pointer;
+    height: 80px;
+    box-sizing: border-box;
+    border: 1px solid #4080D0;
+    background: #a0c0ff;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-button p {
+    line-height: 1.2em;
+    text-align: center;
+    margin: .5em;
+    font-size: .8em;
+}
+
+.image-button input[type=file] {
+    display: none;
+}
+
+.image-button img {
+    display: none;
+    position: absolute;
+}
+
+.image-button div.remove {
+    display: none;
+    position: absolute;
+    font-size: 1.2em;
+    top: 0;
+    right: 0;
+    background: #ffffff;
+    line-height: 1.4em;
+    padding: 0 .3em;
+    border-radius: 0 0 0 .5em;
+}
+
+textarea.comment-textarea {
+    width: 100%;
+    height: 80px;
+    box-sizing: border-box;
+    border: 1px solid #4080D0;
+}
+
+p.submit-block {
+    text-align: right;
+}
+
+#invert-comment-public i {
+    display: inline-block;
+    width: 1em;
+}
+
+.comment-outcome {
+    padding: .5em;
+    border-radius: .5em;
+    font-weight: 700;
+}
+
+.onerror {
+    background: #ffa0a0;
+}
+
+.onsuccess {
+    background: #a0ffa0;
+}
+
+.rating {
+    color: #ffcc00;
+    text-shadow: 1px 1px 1px #333;
+    display: inline-block;
+}
+
+.rating-widget {
+    font-size: 1.2em;
+    cursor: pointer;
+}

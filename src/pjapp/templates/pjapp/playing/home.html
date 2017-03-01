@@ -1,0 +1,176 @@
+{% extends "pjapp/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load pjapp_extras %}
+
+{% block page_name %}<i class="fa fa-play-circle-o"></i> Playing trajectories{% endblock %}
+{% block title_page_name %}Playing trajectories{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<script type="text/javascript" src="{% static "pjapp/script/tagged-explorer.js" %}"></script>
+</script>
+<script>
+    $(function() {
+       $('.recorded-path a.delete-button').click(function() {
+           var id = $(this).parents('li.recorded-path').attr('data-recorded-path-id'),
+               title = $(this).siblings('a.title-name').text().trim();
+           if (confirm('Do you really wish to delete your recorded trajectory "' + title + '"')) {
+               $('#delete-recorded-path-id').val(id);
+               $('#delete-recorded-path-form').submit();
+           }
+           return false;
+       });
+    });
+</script>
+{% endblock %}
+
+{% block body_class %}playing{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        {% if user.is_authenticated %}
+        <p>You are logged in as {{ user.username }}</p>
+        <p>To start a new <em>trajectory</em> <i class="fa fa-line-chart"></i>, choose from the list on the right.</p>
+        <p>To continue with a trajectory you've already started or review your past trajectories, choose from the list below.</p>
+        <h2>
+            Trajectories you've taken part in
+        </h2>
+        <form method="post" action="{% url 'pjapp:play:delete_recorded_path' %}" id="delete-recorded-path-form">
+            {% csrf_token %}
+            <input type="hidden" name="recorded_path_id" id="delete-recorded-path-id" value="" autocomplete="off" />
+            <input type="hidden" name="next" value="{{request.path|urlencode}}" autocomplete="off" />
+        </form>
+        <ul class="recorded-path-type-list">
+            <li class="recorded-path-type item">
+                <h3>
+                    <i class="fa fa-arrow-right"></i>
+                    Still ongoing
+                </h3>
+                <ul>
+                    {% if ongoing_paths %}
+                    {% for trajectory in ongoing_paths %}
+                    <li class="recorded-path" data-recorded-path-id="{{trajectory.id}}">
+                        <p>
+                            <a class="title-name" href="{% url 'pjapp:play:resume_path' pk=trajectory.id %}" title="Continue recorded trajectory">
+                                <i class="fa fa-play"></i>
+                                {{trajectory.title}}
+                            </a>
+                            started {{trajectory.date_started|naturaltime}}
+                            <a href="#" class="delete-button" title="Delete recorded trajectory">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </p>
+                    </li>
+                    {% endfor %}
+                    {% else %}
+                    <li>You have no ongoing trajectories.</li>
+                    {% endif %}
+                </ul>
+            </li>
+            <li class="recorded-path-type item">
+                <h3>
+                    <i class="fa fa-clock-o"></i>
+                    Past trajectories
+                </h3>
+                <ul>
+                    {% if finished_paths %}
+                    {% for trajectory in finished_paths %}
+                    <li class="recorded-path" data-recorded-path-id="{{trajectory.id}}">
+                        <p>
+                            <a class="title-name" href="{% url 'pjapp:play:review_path' pk=trajectory.id %}" title="Review recorded trajectory">
+                                <i class="fa fa-eye"></i>
+                                {{trajectory.title}}
+                            </a>
+                            ended {{trajectory.date_ended|naturaltime}}
+                            <a href="#" class="delete-button" title="Delete recorded trajectory">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </p>
+                    </li>
+                    {% endfor %}
+                    {% else %}
+                    <li>You have no finished trajectories.</li>
+                    {% endif %}
+                </ul>
+            </li>
+        </ul>
+        {% else %}
+        <h2>Welcome to protojourneys!</h2>
+        <p>You can see the list of trajectories, but you'll need to <a href="{% login_url %}?next={% url 'pjapp:play:home' %}">register or log in</a> to take part in one</p>
+        {% endif %}
+    </div>
+    <div class="column">
+        <h2>
+            Choose a trajectory
+        </h2>
+        {% with pathcount=paths.count %}
+        <p>{{pathcount}} trajector{{ pathcount|pluralize:"y,ies" }} available.</p>
+        <div class="path-explorer tagged-explorer">
+        {% if pathcount > 1 %}
+            <p>
+                <i class="fa fa-search"></i>
+                <input class="explorer-search" type="text" autocomplete="off" placeholder="Search in trajectories" />
+                <a class="empty-explorer-search" href="#">
+                    <i class="fa fa-times"></i>
+                </a>
+            </p>
+            {% if path_tags.count %}
+            <ul class="filter-tag-list">
+                <li class="filter-tag-list-title">
+                    <i class="fa fa-filter"></i>
+                    Filter by tag:
+                </li>
+                {% for tag in path_tags %}
+                <li class="filter-tag" data-tag-id="{{ tag.id }}">
+                    <a href="#" onclick="return false;">{{tag.text}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endif %}
+        {% endwith %}
+            <ul class="path-list item-list">
+                {% for path in paths %}
+                <li class="path item" data-path-id="{{path.id}}" data-search-index="{{path.title|lower}} {{path.flat_tag_list|lower}} {{path.get_description_text|lower}}">
+                    <h3 class="item-title">
+                        <i class="fa fa-line-chart"></i>
+                        <a href="{% url 'pjapp:play:start_path' slug=path.slug %}" class="title-name">{{path.title}}</a>
+                    </h3>
+                    <p class="item-description">
+                        {{path.get_description_text|truncatechars:100}}
+                    </p>
+                    <table class="item-metadata">
+                        <tr>
+                            <th>
+                                <i class="fa fa-tags fa-fw"></i>
+                                Tags:
+                            </th>
+                            <td>
+                                {% if path.tags.count %}
+                                <ul class="item-tag-list">
+                                    {% for tag in path.tags.all %}
+                                    <li class="item-tag" data-tag-id="{{ tag.id }}">{{tag.text}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="fa fa-user fa-fw"></i>
+                                Creator:
+                            </th>
+                            <td>{{path.project.creator}}</td>
+                        </tr>
+                    </table>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

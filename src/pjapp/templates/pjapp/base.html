@@ -1,0 +1,41 @@
+{% load staticfiles %}
+{% load clientlibs %}
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, width=device-width, user-scalable=no">
+        {% block full_title %}
+        <title>Protojourneys &raquo; {% block title_page_name %}{% endblock %}</title>
+        {% endblock %}
+        
+        {% block header_declarations %}
+        {% clientlib 'reset.css' %}
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,400italic,700,700italic,900,900italic" />
+        {% clientlib 'font-awesome' %}
+        {% clientlib 'jquery' %}
+        {% clientlib 'underscore' %}
+        
+        <link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/base.css" %}" />
+        <script src="{% static "pjapp/script/base.js" %}"></script>
+        {% endblock %}
+    </head>
+    <body class="{% block body_class %}{% endblock %}">
+        <header>
+            <h1>
+                {% block home_link_a %}<a href="{% url 'pjapp:home' %}" class="home-link" title="Protojourneys Home">{% endblock %}
+                    <i class="fa fa-lg fa-home"></i>
+                </a>
+                {% block home_link_b %}<a href="{% url 'pjapp:home' %}" title="Protojourneys Home" class="global-title">Protojourneys{% endblock %} &raquo;</a>
+                <span class="current-location">{% block page_name %}{% endblock %}</span>
+            </h1>
+        </header>
+        <section class="main-section">
+            {% block content %}{% endblock %}
+            <footer>
+                <p>2016 &mdash; Mixed Reality Lab</p>
+            </footer>
+        </section>
+        {% block foot_content %}{% endblock %}
+    </body>
+</html>

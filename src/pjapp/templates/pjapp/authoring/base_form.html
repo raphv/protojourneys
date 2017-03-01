@@ -1,0 +1,58 @@
+{% extends "pjapp/authoring/base.html" %}
+{% load staticfiles %}
+{% load clientlibs %}
+
+{% block header_declarations %}
+{{block.super}}
+{% clientlib 'jquery-ui' %}
+{% clientlib 'jquery-tagit' %}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/django-forms.css" %}" />
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="django-form">
+    {% csrf_token %}
+    {{form.as_p}}
+    <table class="item-metadata">
+        {% block metadata %}
+        {% endblock %}
+    </table>
+    <p class="submit-container">
+        <button class="cancel-button">Cancel</button>
+        <input type="submit" value="{% block submit_name %}Save{% endblock %}" />
+    </p>
+</form>
+{% endblock %}
+
+{% block foot_content %}
+<script>
+    $(function() {
+        var changes = false;
+        $(window).on('beforeunload', function() {
+            if (changes) {
+                return 'Do you want to leave without saving changes?';
+            } else {
+                return;
+            }
+        });
+        _((window.CKEDITOR || {}).instances || {}).each(function(ckinstance) {
+            ckinstance.on('change', function(e) {
+                changes = true;
+            });
+        });
+        $('input,textarea').on('change', function() {
+            changes = true;
+        });
+        $('form').on('submit', function() {
+            changes = false;
+        });
+        $('button.cancel-button').click(function() {
+            changes = false;
+            window.history.back();
+            return false;
+        });
+    });
+</script>
+{% endblock %}

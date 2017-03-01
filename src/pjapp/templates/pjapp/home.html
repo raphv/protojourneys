@@ -1,0 +1,52 @@
+{% extends "pjapp/base.html" %}
+
+{% load pjapp_extras %}
+
+{% block page_name %}Welcome to Protojourneys{% endblock %}
+{% block title_page_name %}Welcome to Protojourneys{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+{% endblock %}
+
+{% block body_class %}common{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <h2>A tool for prototyping trajectories</h2>
+        <p>Which experience are you looking after?</p>
+        <div class="authoring">
+            <h2 class="item">
+                <a href="{% url 'pjapp:author:home' %}">
+                    <i class="fa fa-pencil"></i>
+                    I want to design my own trajectories
+                </a>
+            </h2>
+        </div>
+        <div class="playing">
+            <h2 class="item">
+                <a href="{% url 'pjapp:play:home' %}">
+                    <i class="fa fa-play-circle-o"></i>
+                    I want to play existing trajectories
+                </a>
+            </h2>
+        </div>
+        
+    </div>
+    <div class="column">
+    {% if user.is_authenticated %}
+    <p>
+        <i class="fa fa-user"></i>
+        You are logged in as <em>{{user.username}}</em>
+    </p>
+    {% else %}
+    <p>You are not logged in. You won't be able to play or create trajectories.</p>
+    <p>
+        <i class="fa fa-sign-in"></i>
+        <a href="{% login_url %}?next={% url 'pjapp:home' %}">Log in or register</a>
+    </p>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

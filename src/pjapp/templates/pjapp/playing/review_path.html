@@ -1,0 +1,122 @@
+{% extends "pjapp/playing/base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block page_name %}Review “{{recpath.title}}”{% endblock %}
+{% block title_page_name %}Review “{{recpath.title}}”{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/review.css" %}">
+{% endblock %}
+
+{% block content %}
+<div class="columniser">
+    <div class="column">
+        <table class="item-metadata">
+            <tr>
+                <th>
+                    <i class="fa fa-line-chart fa-fw"></i>
+                    Original trajectory:
+                </th>
+                <td>
+                    {{recpath.path.title}}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-user fa-fw"></i>
+                    Creator:
+                </th>
+                <td>{{recpath.path.project.creator}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    Activities done:
+                </th>
+                <td>{{recpath.get_done_activities}} out of {{recpath.get_total_activities}}</td>
+            </tr>
+            <tr>
+                <th>
+                    <i class="fa fa-question-circle fa-fw"></i>
+                    Status:
+                </th>
+                <td>{{recpath.get_status}}</td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <p>
+                <label>
+                    <i class="fa fa-pencil"></i>
+                    Change the path's title
+                </label>
+                <input type="text" name="title" value="{{recpath.title}}" />
+            </p>
+        </form>
+        {% if recpath.is_ongoing %}
+        <h2>
+            <a href="{% url 'pjapp:play:resume_path' pk=recpath.id %}">
+                <i class="fa fa-eject fa-rotate-90"></i>
+                Continue trajectory
+            </a>
+        </h2>
+        {% endif %}
+        <ul class="review-list">
+            <li class="review-start">
+                <h3>Start of path</h3>
+                <p>Started {{recpath.date_started|naturaltime}}</p>
+            </li>
+            {% for step in recpath.steps.all %}
+            <li class="review-activity review-status-{{step.status}} {{step.is_canonical|yesno:'canonical,non-canonical'}}">
+                <h3>
+                    <a href="{% url 'pjapp:play:play_step' pk=step.id %}" title="Review step">
+                        {{step.path_index|add:1}}.
+                        {{step.get_activity.title}}
+                        <i class="fa fa-{% if step.status == 'P' %}play{% else %}eye{% endif %}"></i>
+                    </a>
+                </h3>
+                {% if step.has_custom_activity %}
+                <p>
+                    This is a custom activity
+                    <a href="{% url 'pjapp:play:edit_custom_activity' pk=step.custom_activity_id %}?next={{request.path|urlencode}}" title="Edit custom activity">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                </p>
+                {% endif %}
+                <p>
+                    {{step.get_status_display}}
+                    {% if step.status == 'P' %}
+                    - started {{step.date_started|naturaltime}}
+                    {% else %}
+                    {{step.date_ended|naturaltime}}
+                    {% endif %}
+                </p>
+            </li>
+            {% endfor %}
+            {% if not recpath.is_ongoing %}
+            <li class="review-end">
+                <h3>End of trajectory</h3>
+                <p>Finished {{recpath.date_ended|naturaltime}}</p>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="column">
+        <h2>Compare with canonical trajectory</h2>
+        <img class="pathmap" src="{% url 'pjapp:svg_path' recorded_path_pk=recpath.id %}"/>
+        <h2>
+            <i class="fa fa-comments"></i>
+            Comments on this trajectory ({{recpath.comments.count}})
+        </h2>
+        {% include 'pjapp/partials/comment_form.html' with recorded_path_id=recpath.id %}
+        <ul class="comment-list">
+            {% for comment in recpath.comments.all %}
+                {% include 'pjapp/partials/comment.html' %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "pjapp/authoring/base_form.html" %}
+
+{% block page_name %}
+    <i class="fa fa-plus-circle"></i>
+    <i class="fa fa-calendar-check-o"></i>
+    Create a new activity
+{% endblock %}
+{% block title_page_name %}Create a new activity{% endblock %}
+
+{% block metadata %}
+<tr>
+    <th>
+        <i class="fa fa-folder-open-o fa-fw"></i>
+        Project:
+    </th>
+    <td>{{project.title}}</td>
+    <th>
+        <i class="fa fa-cogs fa-fw"></i>
+        Optional modules:
+    </th>
+    <td>You can add modules, i.e. additional feature blocks, once you've saved the activity.</td> 
+</tr>
+{% endblock %}
+
+{% block submit_name %}Create activity{% endblock %}

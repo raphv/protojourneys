@@ -1,0 +1,9 @@
+    WSGIDaemonProcess pj python-path=/path/to/protojourneys/src/:/path/to/protojourneys/env/lib/python3.4/site-packages/
+    WSGIProcessGroup pj
+
+    WSGIScriptAlias /protojourneys /path/to/src/pjsite/wsgi.py process-group=pj
+
+    WSGIPythonPath /path/to/protojourneys/src/:/path/to/env/lib/python3.4/site-packages/
+
+    Alias /protojourneys/static /path/to/protojourneys/www/static
+    Alias /protojourneys/media /path/to/protojourneys/www/media

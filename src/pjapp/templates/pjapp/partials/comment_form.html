@@ -1,0 +1,57 @@
+{% load staticfiles %}
+
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/comment-base.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/player.css" %}">
+<script>
+    window.AJAX_COMMENT_ENDPOINT = '{% url "pjapp:play:ajax_comment" %}';
+</script>
+<script src="{% static "pjapp/script/comment-base.js" %}"> </script>
+
+<form method="post" id="comment-form">
+    <p class="comment-outcome onsuccess">
+        The comment was uploaded successfully
+        <i class="fa fa-times"></i>
+    </p>
+    <p class="comment-outcome onerror">
+        The comment failed to be uploaded
+        <i class="fa fa-times"></i>
+    </p>
+    {% if activity_id %}
+    <input autocomplete="off" type="hidden" name="activity_id" value="{{activity_id}}">
+    {% endif %}
+    {% if custom_activity_id %}
+    <input autocomplete="off" type="hidden" name="custom_activity_id" value="{{custom_activity_id}}">
+    {% endif %}
+    {% if recorded_path_id %}
+    <input autocomplete="off" type="hidden" name="recorded_path_id" value="{{recorded_path_id}}">
+    {% endif %}
+    {% csrf_token %}
+    <p>Rate this: <span class="rating rating-widget"></span></p>
+    <input autocomplete="off" type="hidden" name="rating" value="0" id="comment-rating-field">
+    <input autocomplete="off" type="hidden" name="public" value="0" id="comment-public-field">
+    <div class="image-and-comment">
+        <div class="image-cell">
+            <div class="image-button">
+                <p>
+                    <i class="fa fa-file-image-o fa-3x"></i>
+                </p>
+                <p>Add image</p>
+                <input autocomplete="off" name="image" type="file" accept="image/*" />
+                <img src="" />
+                <div class="remove">
+                    <i class="fa fa-trash"></i>
+                </div>
+            </div>
+        </div>
+        <div class="comment-cell">
+            <textarea autocomplete="off" name="content" class="comment-textarea"></textarea>
+        </div>
+    </div>
+    <p id="invert-comment-public">
+        <i class="fa fa-square-o"></i>
+        Make comment publicly visible
+    </p>
+    <p class="submit-block">
+        <input type="submit" value="Save comment" id="submit-comment" />
+    </p>
+</form>

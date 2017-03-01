@@ -1,0 +1,50 @@
+{% extends "pjapp/base.html" %}
+{% load staticfiles %}
+
+{% block page_name %}Sign in or register{% endblock %}
+{% block title_page_name %}Sign in or register{% endblock %}
+
+{% block header_declarations %}
+{{block.super}}
+    <link rel="stylesheet" type="text/css" href="{% static "pjapp/styles/register_or_login.css" %}" />
+{% endblock %}
+
+{% block body_class %}common{% endblock %}
+
+{% block content %}
+<ul>
+    
+    {% if currentuser.username %}
+    <li class="login-page-block">
+        <h2>You are currently logged in as {{currentuser.username}}</h2>
+    </li>
+    {% endif %}
+    
+    {% if login_form %}
+    <li class="login-page-block">
+        <h2>Are you already registered? Sign in here</h2>
+        <form method="post">
+            <input name="next" type="hidden" value="{{next}}" />
+            <input name="action" type="hidden" value="login" />
+            {% csrf_token %}
+            {{ login_form.as_p }}
+            <input type="submit" value="Sign in" />
+        </form>
+    </li>
+    {% endif %}
+    
+    {% if register_form %}
+    <li class="login-page-block">
+        <h2>Are you a new user? Please register here</h2>
+        <form method="post">
+            <input name="next" type="hidden" value="{{next}}" />
+            <input name="action" type="hidden" value="register" />
+            {% csrf_token %}
+            {{ register_form.as_p }}
+            <input type="submit" value="Register" />
+        </form>
+    </li>
+    {% endif %}
+    
+</ul>
+{% endblock %}

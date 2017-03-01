@@ -1,0 +1,214 @@
+button.destbutton,
+#switch-to-comment,
+#submit-step {
+    font-size: 1.1em;
+    display: block;
+    position: relative;
+    color: #ffffff;
+    line-height: 1.1em;
+    padding: .5em .5em .5em 1.8em;
+    border: none;
+    border-radius: .5em;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+button.destbutton i,
+#switch-to-comment i,
+#submit-step i {
+    position: absolute;
+    left: .6em;
+    top: .5em;
+    line-height: 1.1em;
+}
+
+button.base-destination,
+#submit-step {
+    background: #d04080;
+}
+
+button.base-destination.end-destination {
+    background: #d04040;
+}
+
+button.custom-destination {
+    background: #d09040;
+}
+
+button.create-custom-destination {
+    background: #30a060;
+}
+
+#switch-to-comment {
+    background: #103080;
+}
+
+ul.action-bar {
+    background: #D04080;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: #ffffff;
+    text-align: center;
+    z-index: 1200;
+    font-size: 0;
+}
+
+li.player-action {
+    cursor: pointer;
+    width: 80px;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 15px;
+}
+
+@media (max-width:450px) {
+    li.player-action {
+        width: 19%;
+        font-size: 14px;
+    }
+}
+
+@media (max-width:380px) {
+    li.player-action {
+        font-size: 13px;
+    }
+}
+
+div.action-icon {
+    font-size: 1.5em;
+    margin: .1em 0;
+    line-height: 1em;
+}
+
+div.action-text {
+    font-size: .8em;
+    margin: .1em 0;
+    line-height: 1em;
+}
+
+.player-action a {
+    color: #ffffff !important;
+}
+
+div.lightbox-container {
+    display: none;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 1300;
+}
+
+div.lightbox-background {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1301;
+}
+
+div.lightbox-centring {
+    max-width: 500px;
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+div.lightbox-contents {
+    position: absolute;
+    z-index: 1302;
+    top: 30px;
+    left: 20px;
+    right: 20px;
+    padding: 10px;
+    overflow: auto;
+    max-height: 80%;
+}
+
+div.status-block {
+    text-align: center;
+    font-size: 1.2em;
+    margin: 0 0 1em;
+}
+
+.lightbox-contents h3 {
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+a.lightbox-closer {
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    z-index: 1303;
+    background: #D04080;
+    color: #ffffff;
+    border-radius: 1em;
+    font-size: 20px;
+    line-height: 1.25em;
+    width: 1.4em;
+    text-align: center;
+    height: 1.4em;
+}
+
+#comment-lightbox .lightbox-contents {
+    background: #f0f8ff;
+    border: 1px solid #4080D0;
+}
+
+#map-lightbox .lightbox-contents {
+    background: #fff8f0;
+    border: 1px solid #D08040;
+}
+
+#comment-lightbox .lightbox-closer {
+    background: #4080D0;
+    border: 1px solid #003080;
+}
+
+#map-lightbox .lightbox-closer {
+    background: #D08040;
+    border: 1px solid #803000;
+}
+
+form.pending {
+    opacity: .5;
+}
+
+#comment-lightbox .comment.item {
+    background: #ffffff;
+}
+
+.comment-outcome {
+    display: none;
+}
+
+.comment-outcome i {
+    float: right;
+}
+
+.onerror {
+    background: #ffa0a0;
+}
+
+.onsuccess {
+    background: #a0ffa0;
+}
+
+#non-canonical {
+    display: none;
+}
+
+img.pathmap {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+}
